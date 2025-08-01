@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 // Importe seus arquivos separados aqui:
-import 'mobile_home.dart';
-import 'desktop_home.dart';
+import 'mobile/mobile_home.dart';
+import 'desktop/desktop_home.dart';
 
-class ResponsiveFavoritesApp extends StatelessWidget {
-  const ResponsiveFavoritesApp({Key? key}) : super(key: key);
+class ResponsiveHome extends StatelessWidget {
+  const ResponsiveHome({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +37,10 @@ class ResponsiveFavoritesScreen extends StatelessWidget {
         // Detecta o tipo de dispositivo
         if (screenWidth >= tabletBreakpoint) {
           // Desktop/Tablet grande
-          return const DesktopFavoritesScreen();
-        } else if (screenWidth >= mobileBreakpoint) {
-          // Tablet pequeno - pode usar versão desktop simplificada
-          return const DesktopFavoritesScreen();
+          return const DesktopHome();
         } else {
           // Mobile
-          return const MobileFavoritesScreen();
+          return const MobileHome();
         }
       },
     );
@@ -140,63 +137,6 @@ class ResponsiveContainer extends StatelessWidget {
             maxWidth: maxWidth ?? ResponsiveConstants.getMaxContentWidth(context),
           ),
           child: child,
-        ),
-      ),
-    );
-  }
-}
-
-// Placeholder para as telas (substitua pelos seus imports)
-class MobileFavoritesScreen extends StatelessWidget {
-  const MobileFavoritesScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mobile Version'),
-        backgroundColor: const Color(0xFF4A6FA5),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.phone_android, size: 64, color: Color(0xFF4A6FA5)),
-            SizedBox(height: 16),
-            Text(
-              'Versão Mobile',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            FavoritesScreen()
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class DesktopFavoritesScreen extends StatelessWidget {
-  const DesktopFavoritesScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Desktop Version'),
-        backgroundColor: const Color(0xFF4A6FA5),
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.desktop_windows, size: 64, color: Color(0xFF4A6FA5)),
-            SizedBox(height: 16),
-            Text(
-              'Versão Desktop',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            DesktopScreen()
-          ],
         ),
       ),
     );
