@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../veiculos/mobile/mobile_veiculos.dart';
 
-Widget buildBottomNavigationBar() {
+Widget buildBottomNavigationBar(BuildContext context) {
   return Container(
     decoration: BoxDecoration(
       color: const Color(0xFF4A6FA5),
@@ -19,13 +20,21 @@ Widget buildBottomNavigationBar() {
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.white70,
       currentIndex: 0,
+      onTap: (index) {
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MapScreen()),
+          );
+        }
+      },
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.location_on_outlined),
+          icon: Icon(Icons.directions_bus_rounded),
           label: '',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.bookmark_outline),
+          icon: Icon(Icons.map),
           label: '',
         ),
       ],

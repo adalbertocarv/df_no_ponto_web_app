@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import '../../../veiculos/mobile/mobile_veiculos.dart';
 import 'nav_item.dart';
 
-Widget buildDesktopHeader() {
+Widget buildDesktopHeader(BuildContext context) {
   return Container(
     height: 70,
     decoration: BoxDecoration(
@@ -20,31 +21,42 @@ Widget buildDesktopHeader() {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // Logo
           Row(
             children: [
               const SizedBox(width: 12),
-              Image.asset('/images/logo.png')
+              Image.asset('assets/images/logo.png')
             ],
           ),
-
           const Spacer(),
-
-          // Menu de navegação
           Row(
             children: [
-              buildNavItem(Icons.directions_bus, 'Linhas'),
-              buildNavItem(Icons.map, 'Mapa'),
-              buildNavItem(Icons.language, 'GeoServer'),
-              buildNavItem(Icons.forum, 'ParticipaDF'),
+              buildNavItem(Icons.map, 'Mapa', onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MapScreen()),
+                );
+              }),
+              buildNavItem(Icons.language, 'GeoServer', onTap: () async {
+                final uri = Uri.parse('https://geoserver.semob.df.gov.br/');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, webOnlyWindowName: '_blank');
+                }
+              }),
+              buildNavItem(Icons.forum, 'ParticipaDF', onTap: () async {
+                final uri = Uri.parse('https://www.participa.df.gov.br/');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, webOnlyWindowName: '_blank');
+                }
+              }),
+
               const SizedBox(width: 20),
               Container(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Image.asset('/images/gdf-logo.png'),
+                child: Image.asset('assets/images/gdf-logo.png'),
               ),
             ],
           ),

@@ -13,7 +13,7 @@ Widget buildHeroSection(BuildContext context) {
         ],
       ),
       image: const DecorationImage(
-        image: AssetImage('/images/brasilia.png'),
+        image: AssetImage('assets/images/brasilia.png'),
         fit: BoxFit.fitWidth,
         colorFilter: ColorFilter.mode(
           Colors.black26,

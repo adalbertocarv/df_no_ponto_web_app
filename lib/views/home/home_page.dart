@@ -9,7 +9,7 @@ class ResponsiveHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DF no Ponto',
+      title: 'DF no Ponto - SEMOB',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',

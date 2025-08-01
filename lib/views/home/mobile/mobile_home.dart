@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../mobile/widgets/card_noticias.dart';
 
 class MobileHome extends StatelessWidget {
-  const MobileHome({Key? key}) : super(key: key);
+  const MobileHome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class MobileHome extends StatelessWidget {
           onPressed: () {},
         ),
         title: Image.asset(
-          '/images/logo.png',
+          'assets/images/logo.png',
           height: 60,
         ),
         centerTitle: true,
@@ -36,7 +36,7 @@ class MobileHome extends StatelessWidget {
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   spreadRadius: 1,
                   blurRadius: 3,
                   offset: const Offset(0, 1),
@@ -134,7 +134,7 @@ class MobileHome extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      bottomNavigationBar: buildBottomNavigationBar(context),
     );
   }
 }

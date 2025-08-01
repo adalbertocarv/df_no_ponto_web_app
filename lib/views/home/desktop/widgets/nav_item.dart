@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-Widget buildNavItem(IconData icon, String label) {
+Widget buildNavItem(IconData icon, String label, {VoidCallback? onTap}) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
     child: InkWell(
-      onTap: () {},
+      onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.all(8),

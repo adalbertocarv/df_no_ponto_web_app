@@ -18,7 +18,7 @@ class DesktopHome extends StatelessWidget {
       body: Column(
         children: [
           // Header Desktop
-          buildDesktopHeader(),
+          buildDesktopHeader(context),
 
           // Body principal
           Expanded(
@@ -38,16 +38,22 @@ class DesktopHome extends StatelessWidget {
                   buildNewsSection(isDesktop, isTablet),
                   Row(
 
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Secretaria de Estado de Transporte e Mobilidade do Distrito Federal',
-                          style: TextStyle(
-                          fontSize: 22,
-                            fontFamily: 'Roboto',
-                          ),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Secretaria de Estado de Transporte e Mobilidade do Distrito Federal',
+                              style: TextStyle(
+                              ),
+                            ),
+                            SizedBox(width: 12,),
+                            Text('|'),
+                            SizedBox(width: 12,),
+                            Text('GOVERNO DO DISTRITO FEDERAL')
+                          ],
                         ),
                       )
                     ],
