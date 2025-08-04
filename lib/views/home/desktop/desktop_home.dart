@@ -26,7 +26,7 @@ class DesktopHome extends StatelessWidget {
               child: Column(
                 children: [
                   // Hero Section com imagem de fundo
-                  buildHeroSection(context),
+                  SecaoHero(),
 
                   // Seção de Favoritos (flutuante sobre hero)
                   Transform.translate(

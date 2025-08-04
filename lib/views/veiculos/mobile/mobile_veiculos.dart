@@ -21,7 +21,7 @@ class _MapScreenState extends State<MapScreen> {
   final LatLng _defaultLocation = const LatLng(-15.7942, -47.8822);
 
   // Lista de marcadores de exemplo (pontos de ônibus)
-  List<Marker> \_busStopMarkers = [];
+  List<Marker> _busStopMarkers = [];
 
   @override
   void initState() {
