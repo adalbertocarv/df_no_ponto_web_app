@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../models/linha/percurso.dart';
+import '../../constants/api_headers.dart';
 import '../../constants/url.dart';
 
 class PercursoService {
@@ -9,14 +10,7 @@ class PercursoService {
     final url = Uri.parse("${caminhoBackend.baseUrl}/espaciais/$linha");
 
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization': 'Bearer kP\$7g@2n!Vx3X#wQ5^z', // Adicionando o Bearer Token com escape
-          'Content-Type': 'application/json', // Opcional, mas recomendado
-        },
-      );
-
+      final response = await http.get(url, headers: ApiHeaders.json);
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body) as List<dynamic>;

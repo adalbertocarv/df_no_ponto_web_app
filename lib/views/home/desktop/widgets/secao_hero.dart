@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
+import '../../../resultado_linha/resultado_linha.dart';
 
 /// ---------- UTILIDADE (debounce) ----------
 class _Debouncer {
@@ -53,10 +54,18 @@ class _SecaoHeroState extends State<SecaoHero> {
     });
   }
 
+  // dentro de _SecaoHeroState
   void _selectLine(LinhaPesquisa linha) {
     _controller.text = linha.numero;
     _focusNode.unfocus();
     setState(() => _resultados = []);
+
+    // Navegação ➜ ResultadoLinhaPage
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ResultadoLinhaPage(numero: linha.numero),
+      ),
+    );
   }
 
   @override
