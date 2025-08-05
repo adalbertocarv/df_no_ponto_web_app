@@ -50,13 +50,16 @@ Widget buildDesktopHeader(BuildContext context) {
               }),
 
               const SizedBox(width: 20),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
+              InkWell(
+                onTap: () => '',
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Image.asset('assets/images/gdf-logo.png'),
                 ),
-                child: Image.asset('assets/images/gdf-logo.png'),
               ),
             ],
           ),

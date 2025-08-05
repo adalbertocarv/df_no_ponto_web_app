@@ -27,12 +27,12 @@ Widget buildNewsCard() {
             height: 80, // Reduzido para economizar espaço
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: Colors.blue[300],
             ),
             child: const Icon(
               Icons.directions_bus,
               size: 40,
-              color: Colors.grey,
+              color: Colors.white,
             ),
           ),
         ),

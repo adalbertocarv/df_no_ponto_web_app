@@ -2,166 +2,246 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
-/// Tela mobile que exibe:
-/// • Mapa ocupando toda a tela
-/// • DraggableScrollableSheet com detalhes da linha
-class MobileResultadoLinha extends StatelessWidget {
+import '../../../controller/resultado_linha/mapa_linha_controller.dart';
+import '../../../controller/resultado_linha/resultado_linha_controller.dart';
+import '../../../models/linha/percurso.dart';
+import '../../../providers/favoritos.dart';
+
+class MobileResultadoLinha extends StatefulWidget {
   const MobileResultadoLinha({super.key, required this.numero});
   final String numero;
 
-  // ajuste o ponto inicial da câmera, se desejar
-  static const _initialCenter = LatLng(-15.7942, -47.8822);
-  static const _initialZoom = 12.0;
+  @override
+  State<MobileResultadoLinha> createState() => _MobileResultadoLinhaState();
+}
+
+class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
+  final _map = MapController();
+  late final ResultadoLinhaController _dadosController;
+  late final ResultadoMapaController _mapaController;
+
+  static const _fallbackCenter = LatLng(-15.7942, -47.8822);
+  static const _fallbackZoom = 12.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _dadosController = ResultadoLinhaController(widget.numero);
+    _mapaController = ResultadoMapaController(widget.numero);
+
+    _dadosController.addListener(_onDataLoaded);
+    _dadosController.carregarDados(); // inicia carregamento
+  }
+
+  void _onDataLoaded() {
+    if (!_dadosController.carregando && _dadosController.percursos != null) {
+      _mapaController.init(_map, _dadosController.percursos!);
+      setState(() {}); // força rebuild para mostrar o conteúdo
+    }
+  }
+
+  @override
+  void dispose() {
+    _dadosController.removeListener(_onDataLoaded);
+    _dadosController.dispose();
+    _mapaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('$numero'),),
+        title: _buildTitulo(),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [_buildFavoriteButton()],
+      ),
       body: Stack(
         children: [
-          // ---------- MAPA (base) ----------
-          FlutterMap(
-            options: const MapOptions(
-              initialCenter: _initialCenter,
-              initialZoom: _initialZoom,
-            ),
-            children: [
-              TileLayer(
-                tileProvider: CancellableNetworkTileProvider(),
-                urlTemplate:
-                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
-              ),
-              // Adicione aqui Polylines ou Markers da linha, se necessário
-            ],
+          _dadosController.carregando ? _loader() : _buildMap(),
+          _buildDraggableSheet(),
+          _buildBackButton(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTitulo() {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Image(
+            image: AssetImage('assets/images/defaultBus.png'),
+            width: 20,
+            height: 20,
           ),
-
-          // ---------- DRAGGABLE SHEET ----------
-          DraggableScrollableSheet(
-            initialChildSize: 0.25,   // 25 % da altura da tela ao abrir
-            minChildSize: 0.15,       // pode “fechar” até 15 %
-            maxChildSize: 0.80,       // e expandir até 80 %
-            builder: (context, scrollController) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 8,
-                      offset: Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: CustomScrollView(
-                  controller: scrollController,
-                  slivers: [
-                    // ------ Puxador + título ------
-                    SliverToBoxAdapter(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 50,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Linha $numero',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-
-                    // ------ Conteúdo rolável ------
-                    SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          _infoTile(
-                            title: 'Descrição',
-                            value: 'Texto descritivo da linha $numero',
-                          ),
-                          _infoTile(
-                            title: 'Sentido',
-                            value: 'Ida / Volta',
-                          ),
-                          _infoTile(
-                            title: 'Tarifa',
-                            value: 'R\$ 5,50',
-                          ),
-                          _infoTile(
-                            title: 'Operadora',
-                            value: 'Consórcio X',
-                          ),
-                          const Divider(),
-                          // exemplo de paradas
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: Text(
-                              'Paradas da linha',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                          ),
-                          for (int i = 1; i <= 20; i++)
-                            ListTile(
-                              leading: const Icon(Icons.location_on_outlined),
-                              title: Text('Parada $i'),
-                              subtitle: i.isEven
-                                  ? const Text('Linha escolar')
-                                  : null,
-                              onTap: () {
-                                // eventualmente mover o mapa para a parada
-                              },
-                            ),
-                          const SizedBox(height: 40),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          // ---------- BOTÃO VOLTAR ----------
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ),
+          const SizedBox(width: 4),
+          Text(
+            widget.numero,
+            style: const TextStyle(fontSize: 14, color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  // Helper para listar informações simples
-  Widget _infoTile({required String title, required String value}) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Text(value),
-      dense: true,
+  Widget _buildFavoriteButton() {
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, _) {
+        final isFavorited = favoritesProvider.isFavorite(widget.numero);
+        return IconButton(
+          icon: Icon(
+            isFavorited ? Icons.favorite : Icons.favorite_border,
+            color: isFavorited ? Colors.red : Colors.black,
+          ),
+          onPressed: () {
+            final descricao = _dadosController.infoLinha?.firstOrNull?.descricao ?? 'Descrição não disponível';
+            if (isFavorited) {
+              favoritesProvider.removeFavorite(widget.numero);
+            } else {
+              favoritesProvider.addFavorite({
+                'numero': widget.numero,
+                'descricao': descricao,
+              });
+            }
+          },
+        );
+      },
     );
   }
+
+  Widget _loader() =>
+      const Center(child: CircularProgressIndicator(strokeWidth: 2));
+
+  // --------------------------- MAPA ---------------------------
+  Widget _buildMap() {
+    final percursos = _dadosController.percursos ?? {};
+
+    final layers = percursos.entries.expand((entry) {
+      final color = switch (entry.key) {
+        'VOLTA' => Colors.blueAccent,
+        'CIRCULAR' => Colors.blueAccent,
+        _ => Colors.blueAccent,
+      };
+      return entry.value.map(
+            (p) => PolylineLayer(
+          polylines: [
+            Polyline(
+              points: p.coordenadas,
+              strokeWidth: 4,
+              color: color,
+            ),
+          ],
+        ),
+      );
+    }).toList();
+
+    return FlutterMap(
+      mapController: _map,
+      options: const MapOptions(
+        initialCenter: _fallbackCenter,
+        initialZoom: _fallbackZoom,
+      ),
+      children: [
+        TileLayer(
+          tileProvider: CancellableNetworkTileProvider(),
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: const ['a', 'b', 'c'],
+        ),
+        ...layers,
+      ],
+    );
+  }
+
+  // --------------------------- DRAGGABLE SHEET ---------------------------
+  Widget _buildDraggableSheet() {
+    final percursos = _dadosController.percursos ?? {};
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.25,
+      minChildSize: 0.15,
+      maxChildSize: 0.8,
+      builder: (_, controller) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: ListView(
+          controller: controller,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          children: [
+            Center(
+              child: Container(
+                width: 50,
+                height: 4,
+                margin: const EdgeInsets.only(top: 8, bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                'Linha ${widget.numero}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...percursos.entries.expand((e) => [
+              ListTile(
+                leading: const Icon(Icons.alt_route),
+                title: Text('Sentido: ${e.key}'),
+                subtitle: Text('${e.value.length} trecho(s)'),
+                onTap: () {
+                  if (e.value.isNotEmpty &&
+                      e.value.first.coordenadas.isNotEmpty) {
+                    _map.move(e.value.first.coordenadas.first, 14);
+                  }
+                },
+              ),
+              const Divider(height: 1),
+            ]),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --------------------------- BOTÃO VOLTAR ---------------------------
+  Widget _buildBackButton(BuildContext context) => SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: CircleAvatar(
+        backgroundColor: Colors.white,
+        child: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    ),
+  );
 }

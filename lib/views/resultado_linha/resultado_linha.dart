@@ -1,4 +1,4 @@
-// lib/resultado_linha/resultado_linha.dart
+// lib/resultado_linha/resultado_linha_controller.dart
 import 'package:flutter/material.dart';
 import 'desktop/desktop_resultado_linha.dart';
 import 'mobile/mobile_resultado_linha.dart';

@@ -6,8 +6,8 @@ import '../../constants/url.dart';
 
 class PercursoService {
 
-  Future<Map<String, List<PercursoModel>>> buscarPercursos(String linha) async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/espaciais/$linha");
+  Future<Map<String, List<PercursoModel>>> buscarPercursos(String numero) async {
+    final url = Uri.parse("${caminhoBackend.baseUrl}/espaciais/$numero");
 
     try {
       final response = await http.get(url, headers: ApiHeaders.json);

@@ -4,7 +4,6 @@ import '../../models/linha/horario.dart';
 import '../constants/api_headers.dart';
 import '../constants/url.dart';
 
-
 class HorarioService {
   Future<List<HorarioModel>> procurarHorarios(String numero) async {
     final url = Uri.parse("${caminhoBackend.baseUrl}/horario/$numero");

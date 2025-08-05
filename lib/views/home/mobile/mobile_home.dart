@@ -1,140 +1,426 @@
-import 'package:df_no_ponto_web_app/views/home/mobile/widgets/bottom_navigation.dart';
-import 'package:df_no_ponto_web_app/views/home/mobile/widgets/item_favoritos.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../mobile/widgets/card_noticias.dart';
+import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
+import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
+import '../../resultado_linha/resultado_linha.dart';
+import '../campo_busca_linha.dart';               // widget com animação + botão "×"
+import 'widgets/bottom_navigation.dart';
+import 'widgets/item_favoritos.dart';
+import 'widgets/card_noticias.dart';
 
-class MobileHome extends StatelessWidget {
+/// ---------------- debounce ----------------
+class _Debouncer {
+  _Debouncer({required this.milliseconds});
+  final int milliseconds;
+  Timer? _t;
+  void run(VoidCallback action) {
+    _t?.cancel();
+    _t = Timer(Duration(milliseconds: milliseconds), action);
+  }
+
+  void dispose() => _t?.cancel();
+}
+
+/// ---------------- página ----------------
+class MobileHome extends StatefulWidget {
   const MobileHome({super.key});
 
+  @override
+  State<MobileHome> createState() => _MobileHomeState();
+}
+
+class _MobileHomeState extends State<MobileHome> {
+  final _txt = TextEditingController();
+  final _focus = FocusNode();
+  final _debouncer = _Debouncer(milliseconds: 350);
+  final _service = SugestoesLinha();
+
+  List<LinhaPesquisa> _sugestoes = [];
+  bool _carregandoPesquisa = false;
+  String _ultimaQuery = '';
+  String? _mensagemErro;
+
+  @override
+  void dispose() {
+    _debouncer.dispose();
+    _txt.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  /* ------------ busca / seleção ------------ */
+  void _buscar(String q) {
+    // Atualiza a query atual
+    _ultimaQuery = q;
+
+    if (q.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _sugestoes = [];
+          _carregandoPesquisa = false;
+          _mensagemErro = null;
+        });
+      }
+      return;
+    }
+
+    // Mostra loading imediatamente
+    if (mounted) {
+      setState(() {
+        _carregandoPesquisa = true;
+        _mensagemErro = null;
+      });
+    }
+
+    _debouncer.run(() async {
+      // Verifica se a query ainda é a mesma (evita race condition)
+      if (_ultimaQuery != q) return;
+
+      try {
+        final res = await _service.buscarSugestoes(q);
+
+        // Verifica novamente se a query ainda é a mesma
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = res;
+            _carregandoPesquisa = false;
+            _mensagemErro = null;
+          });
+        }
+      } on NetworkException catch (e) {
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = [];
+            _carregandoPesquisa = false;
+            _mensagemErro = 'Sem conexão com a internet.\nVerifique sua conexão.';
+          });
+        }
+      } on ServerException catch (e) {
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = [];
+            _carregandoPesquisa = false;
+            _mensagemErro = e.statusCode == 429
+                ? 'Muitas buscas realizadas.\nTente novamente em alguns instantes.'
+                : 'Serviço temporariamente indisponível.\nTente novamente mais tarde.';
+          });
+        }
+      } on TimeoutException catch (e) {
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = [];
+            _carregandoPesquisa = false;
+            _mensagemErro = 'A busca demorou mais que o esperado.\nTente novamente.';
+          });
+        }
+      } on DataParsingException catch (e) {
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = [];
+            _carregandoPesquisa = false;
+            _mensagemErro = 'Erro ao processar dados.\nTente novamente.';
+          });
+        }
+      } catch (e) {
+        if (mounted && _ultimaQuery == q) {
+          setState(() {
+            _sugestoes = [];
+            _carregandoPesquisa = false;
+            _mensagemErro = 'Erro inesperado.\nTente novamente mais tarde.';
+          });
+        }
+      }
+    });
+  }
+
+  void _selectLine(LinhaPesquisa l) {
+    _txt.text = l.numero;
+    _focus.unfocus();
+    setState(() {
+      _sugestoes = [];
+      _carregandoPesquisa = false;
+      _ultimaQuery = '';
+      _mensagemErro = null;
+    });
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ResultadoLinhaPage(numero: l.numero)),
+    );
+  }
+
+  /* ------------ UI ------------ */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      // IMPORTANTE: Esta propriedade impede que o body se redimensione quando o teclado aparece
       resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.grey[200],
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.grey),
-          onPressed: () {},
-        ),
-        title: Image.asset(
-          'assets/images/logo.png',
-          height: 60,
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
+      appBar: _buildAppBar(),
+      body: Stack(
         children: [
-          // Barra de pesquisa
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  spreadRadius: 1,
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Digite a linha que deseja consultar',
-                hintStyle: TextStyle(color: Colors.grey[400]),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 15,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 24,),
-
-          // Seção de Favoritos (título)
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            child: const Text(
-              'Favoritos',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Área scrollável - Lista de favoritos
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  buildFavoriteItem(
-                    rating: '0.898',
-                    title: 'Riacho Fundo II (...',
-                    isFavorited: true,
-                  ),
-                  const SizedBox(height: 12),
-                  buildFavoriteItem(
-                    rating: '0.881',
-                    title: 'Riacho Fundo II (...',
-                    isFavorited: true,
-                  ),
-                  const SizedBox(height: 12),
-                  buildFavoriteItem(
-                    rating: '0.875',
-                    title: 'Samambaia Norte (...',
-                    isFavorited: true,
-                  ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-          ),
-
-          // FOOTER FIXO - Seção de Notícias
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Título da seção
-                const Text(
-                  'NOTÍCIAS',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Fique por dentro',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Card de notícia
-                buildNewsCard(),
-              ],
-            ),
-          ),
+          _buildContent(),
+          if (_shouldShowOverlay()) _buildOverlay(),
         ],
       ),
       bottomNavigationBar: buildBottomNavigationBar(context),
+    );
+  }
+
+  bool _shouldShowOverlay() {
+    return _carregandoPesquisa || _sugestoes.isNotEmpty || _mensagemErro != null;
+  }
+
+  /* ----- appbar ----- */
+  PreferredSizeWidget _buildAppBar() => AppBar(
+    backgroundColor: Colors.grey[200],
+    elevation: 0,
+    leading: IconButton(
+      icon: const Icon(Icons.menu, color: Colors.grey),
+      onPressed: () {},
+    ),
+    title: Image.asset('assets/images/logo.png', height: 60),
+    centerTitle: true,
+  );
+
+  /* ----- corpo principal ----- */
+  Widget _buildContent() {
+    return Column(
+      children: [
+        // busca
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: CampoBuscaLinha(
+            onQueryChanged: _buscar,
+          ),
+        ),
+        const SizedBox(height: 24),
+        // favoritos título
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'Favoritos',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        // favoritos lista
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                buildFavoriteItem(
+                  rating: '0.898',
+                  title: 'Riacho Fundo II (...',
+                  isFavorited: true,
+                ),
+                const SizedBox(height: 12),
+                buildFavoriteItem(
+                  rating: '0.881',
+                  title: 'Riacho Fundo II (...',
+                  isFavorited: true,
+                ),
+                const SizedBox(height: 12),
+                buildFavoriteItem(
+                  rating: '0.875',
+                  title: 'Samambaia Norte (...',
+                  isFavorited: true,
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+        // notícias
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'NOTÍCIAS',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Fique por dentro',
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 16),
+              buildNewsCard(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /* ----- overlay de sugestões ----- */
+  Widget _buildOverlay() {
+    final width = MediaQuery.of(context).size.width - 32;
+    final top = MediaQuery.of(context).padding.top +
+        kToolbarHeight +
+        16; // margin search
+
+    return Positioned(
+      top: top,
+      left: 16,
+      width: width,
+      child: Material(
+        elevation: 6,
+        color: Colors.white.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 250,
+          child: _buildOverlayContent(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverlayContent() {
+    // Mostra loading
+    if (_carregandoPesquisa) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Buscando linhas...',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Mostra erro se houver
+    if (_mensagemErro != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.orange,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                _mensagemErro!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: () {
+                  if (_ultimaQuery.isNotEmpty) {
+                    _buscar(_ultimaQuery);
+                  }
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Tentar novamente'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Mostra mensagem se não houver resultados
+    if (_sugestoes.isEmpty && _ultimaQuery.isNotEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 48,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Nenhuma linha encontrada',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Tente outro termo de busca',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Mostra lista de sugestões
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: _sugestoes.length,
+      separatorBuilder: (_, __) => const Divider(
+        height: 1,
+        indent: 16,
+        endIndent: 16,
+      ),
+      itemBuilder: (_, i) {
+        final linha = _sugestoes[i];
+        return ListTile(
+          leading: const Icon(
+            Icons.directions_bus,
+            color: Colors.blue,
+            size: 20,
+          ),
+          title: Text(
+            '${linha.numero} - ${linha.descricao}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          subtitle: Text(
+            'Tarifa: R\${linha.tarifa.toString()}0',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+          onTap: () => _selectLine(linha),
+          dense: true,
+        );
+      },
     );
   }
 }
