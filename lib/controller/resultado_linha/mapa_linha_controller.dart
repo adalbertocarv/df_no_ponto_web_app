@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../models/linha/percurso.dart';
-import '../../services/dados_espaciais/linha/itinerario_espacial.dart';
 
 class ResultadoMapaController {
   ResultadoMapaController(this.numero);

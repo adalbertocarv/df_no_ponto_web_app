@@ -165,8 +165,8 @@ class _SecaoHeroState extends State<SecaoHero> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF4A6FA5).withOpacity(0.8),
-            const Color(0xFF354F7A).withOpacity(0.8),
+            const Color(0xFF4A6FA5).withValues(alpha:0.8),
+            const Color(0xFF354F7A).withValues(alpha:0.8),
           ],
         ),
         image: const DecorationImage(
@@ -192,7 +192,7 @@ class _SecaoHeroState extends State<SecaoHero> {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha:0.1),
                       spreadRadius: 2,
                       blurRadius: 20,
                       offset: const Offset(0, 4),
@@ -210,12 +210,12 @@ class _SecaoHeroState extends State<SecaoHero> {
                 height: _shouldShowResults() ? 250 : 0,
                 margin: const EdgeInsets.only(top: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: Colors.white.withValues(alpha:0.95),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     if (_shouldShowResults())
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha:0.1),
                         blurRadius: 12,
                         offset: const Offset(0, 3),
                       ),
@@ -366,7 +366,7 @@ class _SecaoHeroState extends State<SecaoHero> {
           ),
           onTap: () => _selectLine(linha),
           dense: true,
-          hoverColor: Colors.blue.withOpacity(0.05),
+          hoverColor: Colors.blue.withValues(alpha:0.05),
         );
       },
     );

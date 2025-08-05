@@ -31,7 +31,7 @@ class DesktopHome extends StatelessWidget {
                   // Seção de Favoritos (flutuante sobre hero)
                   Transform.translate(
                     offset: const Offset(0, -50),
-                    child: buildFavoritesSection(isDesktop, isTablet),
+                    child: buildFavoritesSection(isDesktop, isTablet, context),
                   ),
 
                   // Seção de Notícias

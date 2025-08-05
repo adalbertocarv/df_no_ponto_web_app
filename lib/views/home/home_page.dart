@@ -25,8 +25,7 @@ class ResponsiveFavoritesScreen extends StatelessWidget {
   const ResponsiveFavoritesScreen({Key? key}) : super(key: key);
 
   // Breakpoints para diferentes tamanhos de tela
-  static const double mobileBreakpoint = 768;
-  static const double tabletBreakpoint = 1024;
+  static const double mobileBreakpoint = 780.0;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +34,7 @@ class ResponsiveFavoritesScreen extends StatelessWidget {
         final screenWidth = constraints.maxWidth;
 
         // Detecta o tipo de dispositivo
-        if (screenWidth >= tabletBreakpoint) {
+        if (screenWidth >= mobileBreakpoint) {
           // Desktop/Tablet grande
           return const DesktopHome();
         } else {

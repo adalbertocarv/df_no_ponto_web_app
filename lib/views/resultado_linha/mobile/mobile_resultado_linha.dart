@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../../controller/resultado_linha/mapa_linha_controller.dart';
 import '../../../controller/resultado_linha/resultado_linha_controller.dart';
-import '../../../models/linha/percurso.dart';
 import '../../../providers/favoritos.dart';
 
 class MobileResultadoLinha extends StatefulWidget {
@@ -21,6 +20,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
   final _map = MapController();
   late final ResultadoLinhaController _dadosController;
   late final ResultadoMapaController _mapaController;
+  late final Future<void> _future;
 
   static const _fallbackCenter = LatLng(-15.7942, -47.8822);
   static const _fallbackZoom = 12.0;
@@ -30,21 +30,11 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     super.initState();
     _dadosController = ResultadoLinhaController(widget.numero);
     _mapaController = ResultadoMapaController(widget.numero);
-
-    _dadosController.addListener(_onDataLoaded);
-    _dadosController.carregarDados(); // inicia carregamento
-  }
-
-  void _onDataLoaded() {
-    if (!_dadosController.carregando && _dadosController.percursos != null) {
-      _mapaController.init(_map, _dadosController.percursos!);
-      setState(() {}); // força rebuild para mostrar o conteúdo
-    }
+    _future = _dadosController.carregarDados();
   }
 
   @override
   void dispose() {
-    _dadosController.removeListener(_onDataLoaded);
     _dadosController.dispose();
     _mapaController.dispose();
     super.dispose();
@@ -54,6 +44,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
         title: _buildTitulo(),
         leading: IconButton(
@@ -62,31 +53,49 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         ),
         actions: [_buildFavoriteButton()],
       ),
-      body: Stack(
-        children: [
-          _dadosController.carregando ? _loader() : _buildMap(),
-          _buildDraggableSheet(),
-          _buildBackButton(context),
-        ],
+      body: FutureBuilder<void>(
+        future: _future,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _loader();
+          } else if (snapshot.hasError) {
+            return const Center(child: Text('Erro ao carregar os dados.'));
+          }
+
+          final percursos = _dadosController.percursos ?? {};
+          _mapaController.init(_map, percursos);
+
+          return Stack(
+            children: [
+              _buildMap(percursos),
+              _buildDraggableSheet(percursos),
+            //  _buildBackButton(context),
+            ],
+          );
+        },
       ),
     );
   }
+
+  void _alternarSentido() {
+    setState(() {
+      _dadosController.alternarSentido();
+    });
+  }
+
+
 
   Widget _buildTitulo() {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
+        color: const Color(0xFF4A6FA5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Image(
-            image: AssetImage('assets/images/defaultBus.png'),
-            width: 20,
-            height: 20,
-          ),
+          const Icon(Icons.directions_bus_rounded, size: 20, color: Colors.white),
           const SizedBox(width: 4),
           Text(
             widget.numero,
@@ -122,18 +131,18 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     );
   }
 
-  Widget _loader() =>
-      const Center(child: CircularProgressIndicator(strokeWidth: 2));
+  Widget _loader() => const Center(child: CircularProgressIndicator(strokeWidth: 2));
 
   // --------------------------- MAPA ---------------------------
-  Widget _buildMap() {
-    final percursos = _dadosController.percursos ?? {};
+  Widget _buildMap(Map<String, List<dynamic>> percursos) {
+    final percursosExibidos = _dadosController.percursosExibidos;
 
-    final layers = percursos.entries.expand((entry) {
-      final color = switch (entry.key) {
-        'VOLTA' => Colors.blueAccent,
-        'CIRCULAR' => Colors.blueAccent,
-        _ => Colors.blueAccent,
+    final layers = percursosExibidos.entries.expand((entry) {
+      final color = switch (entry.key.toUpperCase()) {
+        'VOLTA' => Colors.orangeAccent,
+        'IDA' => Colors.blueAccent,
+        'CIRCULAR' => Colors.redAccent,
+        _ => Colors.grey,
       };
       return entry.value.map(
             (p) => PolylineLayer(
@@ -166,9 +175,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
   }
 
   // --------------------------- DRAGGABLE SHEET ---------------------------
-  Widget _buildDraggableSheet() {
-    final percursos = _dadosController.percursos ?? {};
-
+  Widget _buildDraggableSheet(Map<String, List<dynamic>> percursos) {
     return DraggableScrollableSheet(
       initialChildSize: 0.25,
       minChildSize: 0.15,
@@ -210,14 +217,21 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
               ),
             ),
             const SizedBox(height: 16),
+            if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TextButton(
+                  onPressed: _alternarSentido,
+                  child: const Text('Trocar sentido'),
+                ),
+              ),
             ...percursos.entries.expand((e) => [
               ListTile(
                 leading: const Icon(Icons.alt_route),
                 title: Text('Sentido: ${e.key}'),
                 subtitle: Text('${e.value.length} trecho(s)'),
                 onTap: () {
-                  if (e.value.isNotEmpty &&
-                      e.value.first.coordenadas.isNotEmpty) {
+                  if (e.value.isNotEmpty && e.value.first.coordenadas.isNotEmpty) {
                     _map.move(e.value.first.coordenadas.first, 14);
                   }
                 },
@@ -231,17 +245,17 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     );
   }
 
-  // --------------------------- BOTÃO VOLTAR ---------------------------
-  Widget _buildBackButton(BuildContext context) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: CircleAvatar(
-        backgroundColor: Colors.white,
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-    ),
-  );
+  // // --------------------------- BOTÃO VOLTAR ---------------------------
+  // Widget _buildBackButton(BuildContext context) => SafeArea(
+  //   child: Padding(
+  //     padding: const EdgeInsets.all(12.0),
+  //     child: CircleAvatar(
+  //       backgroundColor: Colors.white,
+  //       child: IconButton(
+  //         icon: const Icon(Icons.arrow_back, color: Colors.black),
+  //         onPressed: () => Navigator.pop(context),
+  //       ),
+  //     ),
+  //   ),
+  // );
 }

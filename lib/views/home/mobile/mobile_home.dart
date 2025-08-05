@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
+import '../../../providers/favoritos.dart';
 import '../../resultado_linha/resultado_linha.dart';
 import '../campo_busca_linha.dart';               // widget com animação + botão "×"
 import 'widgets/bottom_navigation.dart';
@@ -193,6 +195,7 @@ class _MobileHomeState extends State<MobileHome> {
           ),
         ),
         const SizedBox(height: 24),
+
         // favoritos título
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
@@ -206,34 +209,52 @@ class _MobileHomeState extends State<MobileHome> {
           ),
         ),
         const SizedBox(height: 16),
-        // favoritos lista
+
+        // favoritos lista dinâmica
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                buildFavoriteItem(
-                  rating: '0.898',
-                  title: 'Riacho Fundo II (...',
-                  isFavorited: true,
+          child: Consumer<FavoritesProvider>(
+            builder: (context, favoritesProvider, _) {
+              final favoritos = favoritesProvider.favorites;
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: favoritos.isEmpty
+                      ? [
+                    const Text(
+                      textAlign: TextAlign.center,
+                      'Salve suas linhas favoritas \n para exibir elas aqui.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 20),
+                  ]
+                      : favoritos.map((linha) {
+                    return Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => ResultadoLinhaPage(numero: linha['numero']!),
+                              ),
+                            );
+                          },
+                          child: buildFavoriteItem(
+                    numero: linha['numero'] ?? '',
+                    descricao: linha['descricao'] ?? '',
+                    isFavorited: true,
+                        ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(height: 12),
-                buildFavoriteItem(
-                  rating: '0.881',
-                  title: 'Riacho Fundo II (...',
-                  isFavorited: true,
-                ),
-                const SizedBox(height: 12),
-                buildFavoriteItem(
-                  rating: '0.875',
-                  title: 'Samambaia Norte (...',
-                  isFavorited: true,
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+              );
+            },
           ),
         ),
+
         // notícias
         Padding(
           padding: const EdgeInsets.all(16),
@@ -411,7 +432,7 @@ class _MobileHomeState extends State<MobileHome> {
             ),
           ),
           subtitle: Text(
-            'Tarifa: R\${linha.tarifa.toString()}0',
+            'Tarifa: R\$${linha.tarifa.toString()}0',
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 12,

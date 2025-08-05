@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 Widget buildFavoriteItem({
-  required String rating,
-  required String title,
+  required String numero,
+  required String descricao,
   required bool isFavorited,
 }) {
   return Container(
@@ -21,7 +21,7 @@ Widget buildFavoriteItem({
     ),
     child: Row(
       children: [
-        // Rating badge
+        // Número da linha
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
@@ -31,14 +31,11 @@ Widget buildFavoriteItem({
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.directions_bus_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
+              const Icon(Icons.directions_bus_rounded,
+                  color: Colors.white, size: 16),
               const SizedBox(width: 4),
               Text(
-                rating,
+                numero,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -48,22 +45,19 @@ Widget buildFavoriteItem({
             ],
           ),
         ),
-
         const SizedBox(width: 16),
-
-        // Title
         Expanded(
           child: Text(
-            title,
+            descricao,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
+            maxLines: 1,                      // <- adiciona esta linha
+            overflow: TextOverflow.ellipsis, // <- e esta
           ),
         ),
-
-        // Heart icon
         Icon(
           isFavorited ? Icons.favorite : Icons.favorite_border,
           color: isFavorited ? Colors.red : Colors.grey,

@@ -1,8 +1,15 @@
+import 'package:df_no_ponto_web_app/providers/favoritos.dart';
 import 'package:df_no_ponto_web_app/views/home/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const DfNoPontoWebApp());
+  runApp(
+      MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+          ],
+          child: const DfNoPontoWebApp()));
 }
 
 class DfNoPontoWebApp extends StatelessWidget {
