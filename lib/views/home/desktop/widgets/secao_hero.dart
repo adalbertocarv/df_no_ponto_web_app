@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
+import '../../../../providers/favoritos.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
 import '../../../resultado_linha/resultado_linha.dart';
-import '../../campo_busca_linha.dart';
+import '../../widgets/campo_busca_linha.dart';
 
 /// ---------- UTILIDADE (debounce) ----------
 class _Debouncer {
@@ -332,41 +334,66 @@ class _SecaoHeroState extends State<SecaoHero> {
       );
     }
 
-    // Mostra lista de resultados
-    return ListView.separated(
-      itemCount: _resultados.length,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 16,
-        endIndent: 16,
-      ),
-      itemBuilder: (_, i) {
-        final linha = _resultados[i];
-        return ListTile(
-          leading: const Icon(
-            Icons.directions_bus,
-            color: Colors.blue,
-            size: 20,
+    // Mostra lista de resultados com funcionalidade de favoritos
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, _) {
+        return ListView.separated(
+          itemCount: _resultados.length,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          separatorBuilder: (_, __) => const Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
           ),
-          title: Text(
-            '${linha.numero} - ${linha.descricao}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          subtitle: Text(
-            'Tarifa: R\$${linha.tarifa.toString()}0',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-          onTap: () => _selectLine(linha),
-          dense: true,
-          hoverColor: Colors.blue.withValues(alpha:0.05),
+          itemBuilder: (_, i) {
+            final linha = _resultados[i];
+            final numero = linha.numero;
+            final descricao = linha.descricao;
+            final isFavorited = favoritesProvider.isFavorite(numero);
+
+            return ListTile(
+              leading: const Icon(
+                Icons.directions_bus,
+                color: Colors.blue,
+                size: 20,
+              ),
+              title: Text(
+                '$numero - $descricao',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: Text(
+                'Tarifa: R\$${linha.tarifa.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  isFavorited ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorited ? Colors.red : Colors.grey,
+                  size: 20,
+                ),
+                onPressed: () {
+                  if (isFavorited) {
+                    favoritesProvider.removeFavorite(numero);
+                  } else {
+                    favoritesProvider.addFavorite({
+                      'numero': numero,
+                      'descricao': descricao,
+                    });
+                  }
+                },
+              ),
+              onTap: () => _selectLine(linha),
+              dense: true,
+              hoverColor: Colors.blue.withValues(alpha:0.05),
+            );
+          },
         );
       },
     );

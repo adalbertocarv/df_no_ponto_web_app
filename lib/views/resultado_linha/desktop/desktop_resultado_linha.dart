@@ -5,6 +5,8 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../controller/resultado_linha/mapa_linha_controller.dart';
 import '../../../controller/resultado_linha/resultado_linha_controller.dart';
+import '../widgets/build_titulo.dart';
+import '../widgets/favorite_button.dart';
 
 class DesktopResultadoLinha extends StatefulWidget {
   const DesktopResultadoLinha({super.key, required this.numero});
@@ -99,34 +101,52 @@ class _DesktopResultadoLinhaState extends State<DesktopResultadoLinha> {
     final percursos = _dadosController.percursos ?? {};
     final itinerario = _dadosController.itinerarioDescritivo;
 
-    return Container(
-      width: 380,
-      color: Colors.grey[100],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        width: 380,
+        color: Colors.grey[100],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TextButton(
+                  onPressed: _alternarSentido,
+                  child: const Text('Trocar sentido'),
+                ),
+              ),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+                  TituloWidget(numero: widget.numero),
+                  FavoriteButtonWidget(
+                    numero: widget.numero,
+                    descricao: _dadosController.infoLinha?.firstOrNull?.descricao ?? 'Descrição não disponível',
+                  ),
+                ]),
             Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: TextButton(
-                onPressed: _alternarSentido,
-                child: const Text('Trocar sentido'),
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Linha ${widget.numero}',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              'Linha ${widget.numero}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            const Divider(height: 1),
+            Expanded(
+              child: _dadosController.carregando
+                  ? const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : _buildSidePanelContent(percursos, itinerario),
             ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: _dadosController.carregando
-                ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-                : _buildSidePanelContent(percursos, itinerario),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -191,14 +211,19 @@ class _DesktopResultadoLinhaState extends State<DesktopResultadoLinha> {
         initialCenter: _fallbackCenter,
         initialZoom: _fallbackZoom,
         onMapReady: _onMapReady,
+        maxZoom: 20,
+        minZoom: 9.5
       ),
       children: [
         TileLayer(
           tileProvider: CancellableNetworkTileProvider(),
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: const ['a', 'b', 'c'],
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.df.no.ponto',
         ),
         ...layers,
+        const SimpleAttributionWidget(
+          source: Text('OpenStreetMap contributors'),
+        ),
       ],
     );
   }

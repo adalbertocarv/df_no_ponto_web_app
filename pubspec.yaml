@@ -77,6 +77,7 @@ flutter:
     - assets/images/marechalBus.png
     - assets/images/sao_joseBus.png
     - assets/images/defaultBus.png
+    - assets/images/ouvidoria.webp
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

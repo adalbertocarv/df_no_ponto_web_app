@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:df_no_ponto_web_app/views/home/mobile/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +7,7 @@ import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
 import '../../../providers/favoritos.dart';
 import '../../resultado_linha/resultado_linha.dart';
-import '../campo_busca_linha.dart';               // widget com animação + botão "×"
+import '../widgets/campo_busca_linha.dart';               // widget com animação + botão "×"
 import 'widgets/bottom_navigation.dart';
 import 'widgets/item_favoritos.dart';
 import 'widgets/card_noticias.dart';
@@ -154,6 +155,7 @@ class _MobileHomeState extends State<MobileHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       backgroundColor: Colors.grey[200],
       resizeToAvoidBottomInset: false,
       appBar: _buildAppBar(),
@@ -175,9 +177,13 @@ class _MobileHomeState extends State<MobileHome> {
   PreferredSizeWidget _buildAppBar() => AppBar(
     backgroundColor: Colors.grey[200],
     elevation: 0,
-    leading: IconButton(
-      icon: const Icon(Icons.menu, color: Colors.grey),
-      onPressed: () {},
+    leading: Builder(
+      builder: (context) => IconButton(
+        icon: const Icon(Icons.menu, color: Colors.grey),
+        onPressed: () {
+          Scaffold.of(context).openDrawer(); // Agora vai funcionar
+        },
+      ),
     ),
     title: Image.asset('assets/images/logo.png', height: 60),
     centerTitle: true,
@@ -229,27 +235,31 @@ class _MobileHomeState extends State<MobileHome> {
                     const SizedBox(height: 20),
                   ]
                       : favoritos.map((linha) {
+                    final numero = linha['numero'] ?? '';
+                    final descricao = linha['descricao'] ?? '';
+
                     return Column(
                       children: [
-                        GestureDetector(
+                        buildFavoriteItem(
+                          numero: numero,
+                          descricao: descricao,
+                          isFavorited: true,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => ResultadoLinhaPage(numero: linha['numero']!),
+                                builder: (_) => ResultadoLinhaPage(numero: numero),
                               ),
                             );
                           },
-                          child: buildFavoriteItem(
-                    numero: linha['numero'] ?? '',
-                    descricao: linha['descricao'] ?? '',
-                    isFavorited: true,
-                        ),
+                          onRemove: () {
+                            favoritesProvider.removeFavorite(numero);
+                          },
                         ),
                         const SizedBox(height: 12),
                       ],
                     );
                   }).toList(),
-                ),
+                )
               );
             },
           ),
@@ -297,7 +307,7 @@ class _MobileHomeState extends State<MobileHome> {
       width: width,
       child: Material(
         elevation: 6,
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(16),
         child: SizedBox(
           height: 250,
@@ -407,39 +417,62 @@ class _MobileHomeState extends State<MobileHome> {
     }
 
     // Mostra lista de sugestões
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _sugestoes.length,
-      separatorBuilder: (_, __) => const Divider(
-        height: 1,
-        indent: 16,
-        endIndent: 16,
-      ),
-      itemBuilder: (_, i) {
-        final linha = _sugestoes[i];
-        return ListTile(
-          leading: const Icon(
-            Icons.directions_bus,
-            color: Colors.blue,
-            size: 20,
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, _) {
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: _sugestoes.length,
+          separatorBuilder: (_, __) => const Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
           ),
-          title: Text(
-            '${linha.numero} - ${linha.descricao}',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          subtitle: Text(
-            'Tarifa: R\$${linha.tarifa.toString()}0',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-          onTap: () => _selectLine(linha),
-          dense: true,
+          itemBuilder: (_, i) {
+            final linha = _sugestoes[i];
+            final numero = linha.numero;
+            final descricao = linha.descricao;
+            final isFavorited = favoritesProvider.isFavorite(numero);
+
+            return ListTile(
+              leading: const Icon(
+                Icons.directions_bus,
+                color: Colors.blue,
+                size: 20,
+              ),
+              title: Text(
+                '$numero - $descricao',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(
+                'Tarifa: R\$${linha.tarifa.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 12,
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  isFavorited ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorited ? Colors.red : Colors.grey,
+                  size: 20,
+                ),
+                onPressed: () {
+                  if (isFavorited) {
+                    favoritesProvider.removeFavorite(numero);
+                  } else {
+                    favoritesProvider.addFavorite({
+                      'numero': numero,
+                      'descricao': descricao,
+                    });
+                  }
+                },
+              ),
+              onTap: () => _selectLine(linha),
+              dense: true,
+            );
+          },
         );
       },
     );

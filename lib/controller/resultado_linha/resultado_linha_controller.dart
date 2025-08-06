@@ -140,10 +140,6 @@ class ResultadoLinhaController extends ChangeNotifier {
         unicaDirecao = false;
       }
 
-      debugPrint('Mapa de percursos: ${mapas.keys}');
-      debugPrint('hasCircular=$hasCircular, hasIda=$hasIda, hasVolta=$hasVolta');
-      debugPrint('ehCircular=$ehCircular, unicaDirecao=$unicaDirecao');
-
       // Corrige sentido padrão se necessário
       final sentidosDisponiveis = sentidos.keys.toSet();
       if (!sentidosDisponiveis.contains(_sentidoSelecionado)) {
