@@ -7,7 +7,7 @@ import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
 import '../../../providers/favoritos.dart';
 import '../../resultado_linha/resultado_linha.dart';
-import '../widgets/campo_busca_linha.dart';               // widget com animação + botão "×"
+import '../widgets/campo_busca_linha.dart';
 import 'widgets/bottom_navigation.dart';
 import 'widgets/item_favoritos.dart';
 import 'widgets/card_noticias.dart';
@@ -154,18 +154,20 @@ class _MobileHomeState extends State<MobileHome> {
   /* ------------ UI ------------ */
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const AppDrawer(),
-      backgroundColor: Colors.grey[200],
-      resizeToAvoidBottomInset: false,
-      appBar: _buildAppBar(),
-      body: Stack(
-        children: [
-          _buildContent(),
-          if (_shouldShowOverlay()) _buildOverlay(),
-        ],
+    return SafeArea(
+      child: Scaffold(
+        drawer: const AppDrawer(),
+        backgroundColor: Colors.grey[200],
+        resizeToAvoidBottomInset: false,
+        appBar: _buildAppBar(),
+        body: Stack(
+          children: [
+            _buildContent(),
+            if (_shouldShowOverlay()) _buildOverlay(),
+          ],
+        ),
+        bottomNavigationBar: buildBottomNavigationBar(context),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(context),
     );
   }
 

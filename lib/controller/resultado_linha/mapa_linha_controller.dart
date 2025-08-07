@@ -92,6 +92,11 @@ class ResultadoMapaController {
     return 16.0;
   }
 
+  /// Chamada externa para centralizar o mapa com os dados já carregados
+  void centralizarMapaAtual() {
+    _centralizarMapa(percursos.value);
+  }
+
   /// Libera os notifiers (chame em dispose da view)
   void dispose() {
     loading.dispose();

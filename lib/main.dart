@@ -1,6 +1,6 @@
 import 'package:df_no_ponto_web_app/providers/favoritos.dart';
-import 'package:df_no_ponto_web_app/theme/theme_provider.dart';
 import 'package:df_no_ponto_web_app/views/home/home_page.dart';
+import 'package:df_no_ponto_web_app/views/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

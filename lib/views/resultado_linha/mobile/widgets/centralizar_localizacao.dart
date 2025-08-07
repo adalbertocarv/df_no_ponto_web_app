@@ -14,7 +14,7 @@ class CentralizarLocalizacao extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           onPressed: () => (),
           child: const Icon(Icons.my_location),
         ));
