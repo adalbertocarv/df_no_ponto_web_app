@@ -23,11 +23,6 @@ class HorarioModel {
       horarios: horariosList,
     );
   }
-
-  @override
-  String toString() {
-    return 'HorarioModel(numeroLinha: $numeroLinha, sentido: $sentido, duracaoMedia: ${duracaoMedia ?? "Não informado"}, horarios: $horarios)';
-  }
 }
 
 class Horario {
@@ -69,10 +64,5 @@ class Horario {
       default:
         return diasSemana;
     }
-  }
-
-  @override
-  String toString() {
-    return 'Horario(horario: $horario, operador: $operador, diasLabel: $diaLabel, diasSemana: $diasSemana, hora: $hora, minuto: $minuto)';
   }
 }

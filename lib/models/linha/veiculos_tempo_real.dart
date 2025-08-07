@@ -64,30 +64,33 @@ class Geometry {
 }
 
 class Properties {
-  final String? nm_Operadora;
+  final String? nm_operadora;
   final String? prefixo;
   final String? datalocal;
   final String? velocidade;
   final String? cdLinha;
   final String? direcao;
+  final String? sentido;
 
   Properties({
-    required this.nm_Operadora,
+    required this.nm_operadora,
     required this.prefixo,
     required this.datalocal,
     required this.velocidade,
     required this.cdLinha,
     required this.direcao,
+    required this.sentido,
   });
 
   factory Properties.fromJson(Map<String, dynamic> json) {
     return Properties(
-      nm_Operadora: json['nm_operadora'],
+      nm_operadora: json['nm_operadora'],
       prefixo: json['prefixo'],
       datalocal: json['datalocal'],
       velocidade: json['velocidade'],
       cdLinha: json['cd_linha'],
       direcao: json['direcao'],
+      sentido: json['sentido'],
     );
   }
 
@@ -102,5 +105,5 @@ class Properties {
 
   // Método para obter a imagem correta da operadora
   String get busImage =>
-      operadoraCores[nm_Operadora] ?? 'assets/images/defaultBus.png';
+      operadoraCores[nm_operadora] ?? 'assets/images/defaultBus.png';
 }
