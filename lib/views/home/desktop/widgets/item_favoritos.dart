@@ -32,7 +32,7 @@ Widget buildDesktopFavoriteItem({
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0xFF4A6FA5),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

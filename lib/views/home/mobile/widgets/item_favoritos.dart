@@ -26,29 +26,24 @@ Widget buildFavoriteItem({
       child: Row(
         children: [
           // Número da linha
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4A6FA5),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.directions_bus_rounded,
-                    color: Colors.white, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  numero,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
+      Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4A6FA5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.directions_bus_rounded, size: 20, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            numero,
+            style: const TextStyle(fontSize: 14, color: Colors.white),
           ),
+        ],
+      ),
+    ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(

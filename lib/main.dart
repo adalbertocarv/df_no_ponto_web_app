@@ -21,8 +21,18 @@ class DfNoPontoWebApp extends StatelessWidget {
       title: 'DF no Ponto - SEMOB',
      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF4A6FA5)),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4A6FA5),
+          brightness: Brightness.light,
+        ),
+        scaffoldBackgroundColor: Colors.grey[100],
+        primaryColor: const Color(0xFF4A6FA5),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF4A6FA5),
+          elevation: 0,
+        ),
       ),
       home: const ResponsiveHome(),
     );

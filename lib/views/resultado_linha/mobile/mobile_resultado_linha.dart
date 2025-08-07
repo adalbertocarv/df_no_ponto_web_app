@@ -1,3 +1,4 @@
+import 'package:df_no_ponto_web_app/views/resultado_linha/mobile/widgets/centralizar_localizacao.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -148,7 +149,10 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     return FlutterMap(
       mapController: _map,
       options: MapOptions(
-          initialCenter: _fallbackCenter,
+        interactionOptions: const InteractionOptions(
+          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        ),
+        initialCenter: _fallbackCenter,
           initialZoom: _fallbackZoom,
           onMapReady: _onMapReady,
           maxZoom: 20,
@@ -159,6 +163,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         ),
         ...layers,
+        CentralizarLocalizacao(),
         const SimpleAttributionWidget(
           source: Text('OpenStreetMap contributors'),
         ),
@@ -203,20 +208,27 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
             ),
             Center(
               child: Text(
-                'Linha ${widget.numero}',
+                'Linha: ${widget.numero}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
               Padding(
-                padding: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 8),
                 child: TextButton(
                   onPressed: _alternarSentido,
-                  child: const Text('Trocar sentido'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blueAccent,
+                    overlayColor: Colors.blueAccent.withValues(alpha: 0.1), // Cor ao pressionar
+                  ),
+                  child: const Text(
+                    'Trocar sentido',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
             ...percursos.entries.expand((e) => [

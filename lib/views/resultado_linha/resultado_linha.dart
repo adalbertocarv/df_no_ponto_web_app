@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'desktop/desktop_resultado_linha.dart';
+import 'desktop/desktop_resultado.dart';
 import 'mobile/mobile_resultado_linha.dart';
 
 class ResultadoLinhaPage extends StatelessWidget {
@@ -12,7 +12,7 @@ class ResultadoLinhaPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     if (width >= _desktopBreakpoint) {
-      return DesktopResultadoLinha(numero: numero);
+      return DesktopResultadoLinhaPage(numero: numero);
     }
     return MobileResultadoLinha(numero: numero);
   }
