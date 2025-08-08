@@ -252,7 +252,7 @@ class _MapScreenState extends State<MapScreen> {
               // Camada do mapa base
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.df.no.ponto',
+                userAgentPackageName: 'com.df.no.ponto.df_no_ponto_web_app',
                 maxZoom: 18,
               ),
 

@@ -43,6 +43,7 @@ dependencies:
   shared_preferences: ^2.5.3
   provider: ^6.1.5
   latlong2: ^0.9.1
+  smooth_page_indicator: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,8 @@ flutter:
     - assets/images/defaultBus.png
     - assets/images/ouvidoria.webp
     - assets/images/user_location.png
+    - assets/images/bus.png
+    - assets/images/BusStop.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

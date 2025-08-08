@@ -103,7 +103,7 @@ class _DesktopResultadoLinhaPageState extends State<DesktopResultadoLinhaPage> {
             numero: widget.numero,
             dadosController: _dadosController,
             onAlternarSentido: _alternarSentido,
-            onMoveToPercurso: _moveToPercurso,
+            onMoveToPercurso: _moveToPercurso, mapController: _map,
           ),
 
           // Área do mapa

@@ -16,6 +16,18 @@ class VeiculosTempoReal {
       type: json['type'],
     );
   }
+
+  /// Filtra veículos por sentido (IDA ou VOLTA)
+  List<Feature> veiculosPorSentido(String sentido) {
+    return features.where((feature) =>
+    feature.properties.sentido?.toUpperCase() == sentido.toUpperCase()
+    ).toList();
+  }
+
+  /// Retorna todos os veículos para linhas circulares ou unidirecionais
+  List<Feature> todosVeiculos() {
+    return features;
+  }
 }
 
 class Feature {
@@ -23,7 +35,8 @@ class Feature {
   final String type;
   final Properties properties;
 
-  Feature({required this.geometry, required this.type, required this.properties});
+  Feature(
+      {required this.geometry, required this.type, required this.properties});
 
   factory Feature.fromJson(Map<String, dynamic> json) {
     return Feature(
@@ -33,21 +46,65 @@ class Feature {
     );
   }
 
-  Marker toMarker() {
+  /// Cria um marker para o veículo com informações no tooltip
+  Marker toMarker({VoidCallback? onTap}) {
     return Marker(
       point: LatLng(geometry.coordinates[1], geometry.coordinates[0]),
-      width: 30,
-      height: 30,
-      child: Center(
-        child: Image.asset(
-          properties.busImage,
-          width: 30,
-          height: 30,
+      width: 35,
+      height: 35,
+      alignment: Alignment.center,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: getColorBySentido(),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Image.asset(
+              properties.busImage,
+              width: 25,
+              height: 25,
+              errorBuilder: (context, error, stackTrace) =>
+              const Icon(
+                Icons.directions_bus,
+                size: 20,
+                color: Colors.blueAccent,
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
+  /// Retorna a cor baseada no sentido do veículo
+  Color getColorBySentido() {
+    switch (properties.sentido?.toUpperCase()) {
+      case 'IDA':
+        return Colors.blueAccent;
+      case 'VOLTA':
+        return Colors.orangeAccent;
+      case 'CIRCULAR':
+        return Colors.redAccent;
+      default:
+        return Colors.grey;
+    }
+  }
 }
+
+
+
 
 class Geometry {
   final List<double> coordinates;

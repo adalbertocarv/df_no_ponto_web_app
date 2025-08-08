@@ -10,7 +10,7 @@ Widget buildDesktopHeader(BuildContext context) {
       color: Colors.white,
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
+          color: Colors.grey.withValues(alpha: 0.1),
           spreadRadius: 1,
           blurRadius: 8,
           offset: const Offset(0, 2),
@@ -43,7 +43,7 @@ Widget buildDesktopHeader(BuildContext context) {
                 }
               }),
               buildNavItem(Icons.forum, 'ParticipaDF', onTap: () async {
-                final uri = Uri.parse('https://www.participa.df.gov.br/');
+                final uri = Uri.parse('https://www.participa.df.gov.br/pages/registro-manifestacao/relato');
                 if (await canLaunchUrl(uri)) {
                   await launchUrl(uri, webOnlyWindowName: '_blank');
                 }

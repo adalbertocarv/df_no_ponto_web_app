@@ -35,7 +35,7 @@ class DesktopHome extends StatelessWidget {
                   ),
 
                   // Seção de Notícias
-                  buildNewsSection(isDesktop, isTablet),
+                  buildNewsSectionDesktop(),
                   Row(
 
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

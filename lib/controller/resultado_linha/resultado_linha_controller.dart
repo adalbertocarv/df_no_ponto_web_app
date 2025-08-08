@@ -70,6 +70,26 @@ class ResultadoLinhaController extends ChangeNotifier {
     return sentidos.length == 1 && !sentidos.contains('CIRCULAR');
   }
 
+  /// Retorna os veículos que devem ser exibidos no mapa baseado no sentido selecionado
+  List<Feature> get veiculosExibidos {
+    if (veiculos == null || veiculos!.features.isEmpty) {
+      return [];
+    }
+
+    // Para linhas circulares, mostra todos os veículos
+    if (ehCircular) {
+      return veiculos!.todosVeiculos();
+    }
+
+    // Para linhas unidirecionais, mostra todos os veículos
+    if (unicaDirecao) {
+      return veiculos!.todosVeiculos();
+    }
+
+    // Para linhas IDA-VOLTA, filtra pelo sentido selecionado
+    return veiculos!.veiculosPorSentido(_sentidoSelecionado);
+  }
+
   /// Retorna apenas os percursos que devem ser exibidos no momento
   Map<String, List<PercursoModel>> get percursosExibidos {
     final exibidos = <String, List<PercursoModel>>{};

@@ -230,11 +230,19 @@ class _MobileHomeState extends State<MobileHome> {
                   children: favoritos.isEmpty
                       ? [
                     const Text(
-                      textAlign: TextAlign.center,
                       'Salve suas linhas favoritas \n para exibir elas aqui.',
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
-                    const SizedBox(height: 20),
+
+                    Opacity(
+                      opacity: 0.3, // Opacidade baixa
+                      child: Image.asset(
+                        'assets/images/BusStop.png',
+                        width: 280,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ]
                       : favoritos.map((linha) {
                     final numero = linha['numero'] ?? '';
@@ -288,7 +296,7 @@ class _MobileHomeState extends State<MobileHome> {
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const SizedBox(height: 16),
-              buildNewsCard(),
+              NoticiasCarousel(),
             ],
           ),
         ),

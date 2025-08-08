@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:df_no_ponto_web_app/views/resultado_linha/mobile/widgets/centralizar_localizacao.dart';
 import 'package:df_no_ponto_web_app/views/resultado_linha/mobile/widgets/centralizar_polylines.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +113,83 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
   }
 
   void _alternarSentido() {
-    _dadosController.alternarSentido();
+    if (!_dadosController.ehCircular && !_dadosController.unicaDirecao) {
+      _dadosController.alternarSentido();
+      // Força a reconstrução do mapa com os novos veículos
+      setState(() {});
+    }
+  }
+
+  void _showVehicleTooltip(BuildContext context, Feature veiculo, Offset position) {
+    final props = veiculo.properties;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.transparent,
+      builder: (context) => Stack(
+        children: [
+          Positioned(
+            left: position.dx - 100,
+            top: position.dy - 120,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: 200,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Prefixo: ${props.prefixo ?? 'N/A'}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (props.velocidade != null)
+                      Text(
+                        'Velocidade: ${props.velocidade} km/h',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    if (props.sentido != null)
+                      Text(
+                        'Sentido: ${props.sentido}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    if (props.nm_operadora != null)
+                      Text(
+                        'Operadora: ${props.nm_operadora}',
+                        style: const TextStyle(fontSize: 10),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Auto-fecha o tooltip após 3 segundos
+    Timer(const Duration(seconds: 3), () {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
 
@@ -131,8 +209,10 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     }
 
     final percursosExibidos = _dadosController.percursosExibidos;
+    final veiculosExibidos = _dadosController.veiculosExibidos;
 
-    final layers = percursosExibidos.entries.expand((entry) {
+    // Cria as camadas de polylines
+    final polylineLayers = percursosExibidos.entries.expand((entry) {
       final color = switch (entry.key.toUpperCase()) {
         'VOLTA' => Colors.orangeAccent,
         'IDA' => Colors.blueAccent,
@@ -140,7 +220,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         _ => Colors.grey,
       };
       return entry.value.map(
-        (p) => PolylineLayer(
+            (p) => PolylineLayer(
           polylines: [
             Polyline(
               points: p.coordenadas,
@@ -152,6 +232,13 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
       );
     }).toList();
 
+    // Cria os markers dos veículos
+    final vehicleMarkers = veiculosExibidos.map((veiculo) =>
+        veiculo.toMarker(
+          onTap: () => _showVehicleDetails(context, veiculo),
+        )
+    ).toList();
+
     return FlutterMap(
       mapController: _map,
       options: MapOptions(
@@ -159,25 +246,30 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
         ),
         initialCenter: _fallbackCenter,
-          initialZoom: _fallbackZoom,
-          onMapReady: _onMapReady,
-          maxZoom: 20,
-          minZoom: 9.5),
+        initialZoom: _fallbackZoom,
+        onMapReady: _onMapReady,
+        maxZoom: 20,
+        minZoom: 9.5,
+      ),
       children: [
         TileLayer(
           tileProvider: CancellableNetworkTileProvider(),
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.df.no.ponto.df_no_ponto_web_app',
         ),
-        ...layers,
+        // Polylines primeiro (camada de fundo)
+        ...polylineLayers,
+        // Markers dos veículos por cima
+        if (vehicleMarkers.isNotEmpty)
+          MarkerLayer(markers: vehicleMarkers),
         CentralizarLocalizacao(),
-        CentralizarPolylines(mapaController: _mapaController,),
+        CentralizarPolylines(mapaController: _mapaController),
         const SimpleAttributionWidget(
           source: Text('OpenStreetMap contributors'),
         ),
       ],
     );
   }
-
   // --------------------------- DRAGGABLE SHEET ---------------------------
 // Substitua o método _buildDraggableSheet() no seu arquivo mobile_resultado_linha.dart
 
@@ -252,17 +344,37 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                         children: [
                       // Botão trocar sentido
                       if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: TextButton(
+                        // Padding(
+                        //   padding: const EdgeInsets.only(top: 8),
+                        //   child: TextButton(
+                        //     onPressed: _alternarSentido,
+                        //     style: TextButton.styleFrom(
+                        //       foregroundColor: Colors.blueAccent,
+                        //       overlayColor: Colors.blueAccent.withValues(alpha: 0.1),
+                        //     ),
+                        //     child: const Text(
+                        //       'Trocar sentido',
+                        //       style: TextStyle(fontSize: 16),
+                        //     ),
+                        //   ),
+                        // ),
+                      // Botão de trocar sentido
+                        SizedBox(
+                          width: 180,
+                          child: ElevatedButton.icon(
                             onPressed: _alternarSentido,
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.blueAccent,
-                              overlayColor: Colors.blueAccent.withValues(alpha: 0.1),
+                            icon: const Icon(Icons.swap_horiz, size: 20),
+                            label: Text(
+                              'Trocar para ${_dadosController.sentidoSelecionado.toUpperCase() == 'IDA' ? 'VOLTA' : 'IDA'}',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
-                            child: const Text(
-                              'Trocar sentido',
-                              style: TextStyle(fontSize: 16),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blueAccent,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),
@@ -627,9 +739,9 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
 
 // Aba de Veículos
   Widget _buildVeiculosTab(ScrollController scrollController) {
-    final veiculos = _dadosController.veiculos; // Assumindo que você tenha essa propriedade
+    final veiculosExibidos = _dadosController.veiculosExibidos;
 
-    if (veiculos == null || veiculos.features.isEmpty) {
+    if (veiculosExibidos.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -649,69 +761,120 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
       );
     }
 
-    return ListView.builder(
-      controller: scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: veiculos.features.length,
-      itemBuilder: (context, index) {
-        final veiculo = veiculos.features[index];
-        final props = veiculo.properties;
+    return Column(
+      children: [
+        // Header com informações do sentido
+        if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _dadosController.sentidoSelecionado.toUpperCase() == 'IDA'
+                  ? Colors.blueAccent.withValues(alpha: 0.1)
+                  : Colors.orangeAccent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: _dadosController.sentidoSelecionado.toUpperCase() == 'IDA'
+                    ? Colors.blueAccent
+                    : Colors.orangeAccent,
+                width: 1,
+              ),
+            ),
+            child: Text(
+              'Exibindo veículos do sentido: ${_dadosController.sentidoSelecionado}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: _dadosController.sentidoSelecionado.toUpperCase() == 'IDA'
+                    ? Colors.blueAccent
+                    : Colors.orangeAccent,
+              ),
+            ),
+          ),
 
-        return Card(
-          color: Colors.grey[100],
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.blueAccent.withValues(alpha: 0.1),
-              ),
-              child: const Icon(
-                Icons.directions_bus,
-                color: Colors.blueAccent,
-              ),
-            ),
-            title: Text(
-              'Prefixo: ${props.prefixo ?? 'N/A'}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (props.nm_operadora != null)
-                  Text('Operadora: ${props.nm_operadora}'),
-                if (props.velocidade != null)
-                  Text('Velocidade: ${props.velocidade} km/h'),
-                if (props.datalocal != null)
-                  Text('Última atualização: ${props.datalocal}'),
-                if (props.direcao != null)
-                  Text('Direção: ${props.direcao}'),
-                if (props.sentido != null)
-                  Text('Sentido: ${props.sentido}'),
-              ],
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.my_location, color: Colors.blueAccent),
-              onPressed: () {
-                // Centraliza o mapa na posição do veículo
-                final coords = veiculo.geometry.coordinates;
-                if (coords.length >= 2) {
-                  _map.move(LatLng(coords[1], coords[0]), 16);
-                }
-              },
-            ),
-            onTap: () {
-              // Mostra mais detalhes do veículo se necessário
-              _showVehicleDetails(context, veiculo);
+        // Lista de veículos
+        Expanded(
+          child: ListView.builder(
+            controller: scrollController,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: veiculosExibidos.length,
+            itemBuilder: (context, index) {
+              final veiculo = veiculosExibidos[index];
+              final props = veiculo.properties;
+              final sentidoColor = veiculo.getColorBySentido();
+
+              return Card(
+                color: Colors.grey[100],
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: sentidoColor.withValues(alpha: 0.1),
+                      border: Border.all(color: sentidoColor, width: 2),
+                    ),
+                    child: Icon(
+                      Icons.directions_bus,
+                      color: sentidoColor,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    'Prefixo: ${props.prefixo ?? 'N/A'}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (props.nm_operadora != null)
+                        Text(
+                          'Operadora: ${props.nm_operadora}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      if (props.velocidade != null)
+                        Text('Velocidade: ${props.velocidade} km/h'),
+                      if (props.sentido != null)
+                        Text(
+                          'Sentido: ${props.sentido}',
+                          style: TextStyle(
+                            color: sentidoColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.my_location,
+                      color: sentidoColor,
+                    ),
+                    onPressed: () {
+                      final coords = veiculo.geometry.coordinates;
+                      if (coords.length >= 2) {
+                        _map.move(LatLng(coords[1], coords[0]), 16);
+
+                        // Fecha o bottom sheet temporariamente para melhor visualização
+                        _draggableController.animateTo(
+                          0.15,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
+                        );
+                      }
+                    },
+                  ),
+                  onTap: () => _showVehicleDetails(context, veiculo),
+                ),
+              );
             },
           ),
-        );
-      },
+        ),
+      ],
     );
   }
-
   void _showVehicleDetails(BuildContext context, Feature veiculo) {
     final props = veiculo.properties;
 
