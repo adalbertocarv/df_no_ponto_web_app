@@ -7,47 +7,19 @@ class ThemeProvider extends ChangeNotifier {
 
   ThemeData get currentTheme => _currentTheme;
 
+  // Getter para cor primária
+  Color get primary => _currentTheme.colorScheme.primary;
+
   static ThemeData _buildLightTheme() {
-    const colorScheme = ColorScheme(
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF4A6FA5),
       brightness: Brightness.light,
-      primary: Color(0xFF4A6FA5),
-      onPrimary: Colors.white,
-      secondary: Color(0xFF89B0D9),
-      onSecondary: Colors.white,
-      error: Color(0xFFB00020),
-      onError: Colors.white,
-      surface: Colors.white,
-      onSurface: Color(0xFF1A1A1A),
-      // Adicionando as propriedades que faltavam
-      surfaceVariant: Color(0xFFF4F6FA),
-      onSurfaceVariant: Color(0xFF121212),
-      outline: Color(0xFF79747E),
-      shadow: Colors.black,
-      inverseSurface: Color(0xFF121212),
-      onInverseSurface: Color(0xFFF4F6FA),
-      inversePrimary: Color(0xFF89B0D9),
-      // Estas são obrigatórias no Material 3
-      primaryContainer: Color(0xFF89B0D9),
-      onPrimaryContainer: Colors.white,
-      secondaryContainer: Color(0xFFE3F2FD),
-      onSecondaryContainer: Color(0xFF121212),
-      tertiary: Color(0xFF4A6FA5),
-      onTertiary: Colors.white,
-      tertiaryContainer: Color(0xFFE3F2FD),
-      onTertiaryContainer: Color(0xFF121212),
-      errorContainer: Color(0xFFFFDAD6),
-      onErrorContainer: Color(0xFF410002),
-      surfaceTint: Color(0xFF4A6FA5),
     );
 
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
       scaffoldBackgroundColor: colorScheme.surfaceVariant,
-
-      // Configurações específicas para garantir que a primary seja aplicada
-      primarySwatch: _createMaterialColor(const Color(0xFF4A6FA5)),
-      primaryColor: const Color(0xFF4A6FA5),
 
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
@@ -61,7 +33,6 @@ class ThemeProvider extends ChangeNotifier {
         ),
       ),
 
-      // Tema dos botões elevados
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
@@ -69,14 +40,12 @@ class ThemeProvider extends ChangeNotifier {
         ),
       ),
 
-      // Tema dos botões de texto
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
         ),
       ),
 
-      // Tema dos botões outlined
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.primary,
@@ -84,7 +53,6 @@ class ThemeProvider extends ChangeNotifier {
         ),
       ),
 
-      // Tema dos campos de texto
       inputDecorationTheme: InputDecorationTheme(
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: colorScheme.primary),
@@ -100,40 +68,6 @@ class ThemeProvider extends ChangeNotifier {
         cursorColor: colorScheme.primary,
         selectionColor: colorScheme.primary.withOpacity(0.4),
         selectionHandleColor: colorScheme.primary,
-      ),
-
-      // Tema dos checkboxes, switches, etc.
-      checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return colorScheme.primary;
-          }
-          return null;
-        }),
-      ),
-
-      radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return colorScheme.primary;
-          }
-          return null;
-        }),
-      ),
-
-      switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return colorScheme.primary;
-          }
-          return null;
-        }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
-            return colorScheme.primary.withOpacity(0.5);
-          }
-          return null;
-        }),
       ),
     );
   }

@@ -356,6 +356,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         final horario = horarios[index];
 
         return Card(
+          color: Colors.grey[100],
           margin: const EdgeInsets.only(bottom: 12),
           child: ExpansionTile(
             leading: const Icon(Icons.schedule, color: Colors.blueAccent),
@@ -454,6 +455,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         final itinerario = itinerarios[index];
 
         return Card(
+          color: Colors.grey[100],
           margin: const EdgeInsets.only(bottom: 12),
           child: ExpansionTile(
             leading: const Icon(Icons.route, color: Colors.orangeAccent),
@@ -559,6 +561,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         final info = infoLinhas[index];
 
         return Card(
+          color: Colors.grey[100],
           margin: const EdgeInsets.only(bottom: 12),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -655,6 +658,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         final props = veiculo.properties;
 
         return Card(
+          color: Colors.grey[100],
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: Container(
@@ -714,6 +718,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text('Veículo ${props.prefixo ?? 'N/A'}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -738,7 +743,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
+            child: const Text('Fechar', style: TextStyle(color: Colors.blueAccent),),
           ),
           TextButton(
             onPressed: () {
@@ -748,7 +753,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                 _map.move(LatLng(coords[1], coords[0]), 18);
               }
             },
-            child: const Text('Ver no Mapa'),
+            child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent),),
           ),
         ],
       ),

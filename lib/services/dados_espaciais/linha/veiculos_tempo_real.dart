@@ -32,6 +32,7 @@ class VeiculosService {
               'velocidade': data['velocidade'],
               'cd_linha': data['cd_linha'],
               'direcao': data['direcao'],
+              'sentido': data['sentido'],
             },
           };
         }).toList(),

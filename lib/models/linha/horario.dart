@@ -18,10 +18,25 @@ class HorarioModel {
 
     return HorarioModel(
       numeroLinha: json['numero'] as String,
-      sentido: json['sentido'] as String,
+      sentido: traduzirSentido(json['sentido'] as String), // aqui aplica tradução
       duracaoMedia: json['tempo_percurso'] as int?,
       horarios: horariosList,
     );
+  }
+
+
+  /// Traduz código do sentido para texto
+  static String traduzirSentido(String codigo) {
+    switch (codigo) {
+      case 'C':
+        return 'CIRCULAR';
+      case 'I':
+        return 'IDA';
+      case 'V':
+        return 'VOLTA';
+      default:
+        return codigo; // retorna o código original se não for reconhecido
+    }
   }
 }
 
@@ -55,12 +70,63 @@ class Horario {
 
   static String formatarDiaSemana(String diasSemana) {
     switch (diasSemana) {
-      case 'SSSSSNN':
-        return 'SEGUNDA-SEXTA';
+    // Todos os dias
+      case 'SSSSSSS':
+        return 'TODOS OS DIAS';
+
+    // Dias únicos
+      case 'SNNNNNN':
+        return 'SEGUNDA';
+      case 'NSNNNNN':
+        return 'TERÇA';
+      case 'NNSNNNN':
+        return 'QUARTA';
+      case 'NNNSNNN':
+        return 'QUINTA';
+      case 'NNNNSNN':
+        return 'SEXTA';
       case 'NNNNNSN':
         return 'SÁBADO';
       case 'NNNNNNS':
         return 'DOMINGO';
+
+    // Dias úteis
+      case 'SSSSSNN':
+        return 'SEGUNDA-SEXTA';
+
+    // Fim de semana
+      case 'NNNNNSS':
+        return 'SÁBADO-DOMINGO';
+
+    // Dias alternados comuns
+      case 'SSNNSNN':
+        return 'SEGUNDA-TERÇA-QUINTA';
+      case 'NNSSNNN':
+        return 'QUARTA-QUINTA';
+      case 'SSNNNNN':
+        return 'SEGUNDA-TERÇA';
+      case 'NNSSSNN':
+        return 'QUARTA-SEXTA';
+      case 'SSSSNSN':
+        return 'SEGUNDA-SEXTA + SÁBADO';
+      case 'SSSSNNS':
+        return 'SEGUNDA-SEXTA + DOMINGO';
+
+    // Padrões especiais conhecidos
+      case 'SNNNNNS':
+        return 'SEGUNDA-DOMINGO';
+      case 'SNNNNNN':
+        return 'SEGUNDA';
+      case 'SSNNNNS':
+        return 'SEGUNDA-TERÇA-DOMINGO';
+
+    // Padrões incomuns mas possíveis
+      case 'SNSNSNS':
+        return 'DIAS ALTERNADOS (SEG, QUA, SEX, DOM)';
+      case 'NSNSNSN':
+        return 'DIAS ALTERNADOS (TER, QUI, SÁB)';
+
+    // Padrões não mapeados
       default:
         return diasSemana;
     }

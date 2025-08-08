@@ -64,7 +64,6 @@ class AppDrawer extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ExpansionTile(
-
                     shape: const Border(),
                     title: const Text(
                       'OUVIDORIA',

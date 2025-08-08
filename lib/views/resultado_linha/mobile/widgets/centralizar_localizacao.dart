@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../theme/theme_provider.dart';
 
 class CentralizarLocalizacao extends StatelessWidget {
   const CentralizarLocalizacao({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final tema = context.watch<ThemeProvider>();
     return Positioned(
         top: 100,
         right: 16,
@@ -14,9 +18,9 @@ class CentralizarLocalizacao extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: tema.primary,
           onPressed: () => (),
-          child: const Icon(Icons.my_location),
+          child: const Icon(Icons.my_location, color: Colors.white,),
         ));
   }
 }

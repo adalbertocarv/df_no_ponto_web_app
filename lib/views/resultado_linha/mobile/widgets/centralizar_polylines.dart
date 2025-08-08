@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../controller/resultado_linha/mapa_linha_controller.dart';
+import '../../../theme/theme_provider.dart';
 
 class CentralizarPolylines extends StatelessWidget {
   final ResultadoMapaController mapaController;
@@ -12,11 +14,13 @@ class CentralizarPolylines extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tema = context.watch<ThemeProvider>();
+
     return Positioned(
       top: 150,
       right: 16,
       child: FloatingActionButton.small(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: tema.primary,
         onPressed: () {
           mapaController.centralizarMapaAtual();
         },
@@ -25,7 +29,7 @@ class CentralizarPolylines extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
-        child: const Icon(Icons.center_focus_strong),
+        child: const Icon(Icons.center_focus_strong, color: Colors.white,),
       ),
     );
   }

@@ -21,13 +21,14 @@ class DfNoPontoWebApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    //final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'DF no Ponto - SEMOB',
       debugShowCheckedModeBanner: false,
-      theme: themeProvider.currentTheme,
-      home: const ResponsiveHome(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+      ),      home: const ResponsiveHome(),
     );
   }
 }
