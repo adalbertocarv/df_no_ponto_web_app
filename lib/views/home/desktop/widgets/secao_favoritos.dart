@@ -42,7 +42,7 @@ Widget buildFavoritesSection(bool isDesktop, bool isTablet, BuildContext context
 
             if (favoritos.isEmpty)
               const Text(
-                'Salve suas linhas favoritas para exibir elas aqui.',
+                'Salve suas linhas favoritas para exibi-las aqui.',
                 style: TextStyle(color: Colors.grey),
               )
             else

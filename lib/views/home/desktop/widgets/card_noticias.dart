@@ -160,6 +160,7 @@ class _NoticiasDesktopState extends State<NoticiasDesktop> {
                 activeDotColor: Color(0xFF4A6FA5),
               ),
             ),
+            const SizedBox(height: 12,)
           ],
         );
       },

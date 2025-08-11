@@ -143,10 +143,10 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                                     topRight: Radius.circular(12),
                                   ),
                                 ),
-                                child: const Icon(
-                                  Icons.directions_bus,
-                                  size: 40,
-                                  color: Colors.white,
+                                child:                   const Image(
+                                  image: AssetImage('assets/images/icon_bus.png'),
+                                  width: 40,
+                                  height: 40,
                                 ),
                               );
                             }

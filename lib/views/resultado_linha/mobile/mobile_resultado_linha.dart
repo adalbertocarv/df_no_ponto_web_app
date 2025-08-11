@@ -242,8 +242,9 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     return FlutterMap(
       mapController: _map,
       options: MapOptions(
-        interactionOptions: const InteractionOptions(
+        interactionOptions: InteractionOptions(
           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+          cursorKeyboardRotationOptions: CursorKeyboardRotationOptions.disabled(),
         ),
         initialCenter: _fallbackCenter,
         initialZoom: _fallbackZoom,
@@ -262,7 +263,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         // Markers dos veículos por cima
         if (vehicleMarkers.isNotEmpty)
           MarkerLayer(markers: vehicleMarkers),
-        CentralizarLocalizacao(),
+        CentralizarLocalizacao(mapController: _map,),
         CentralizarPolylines(mapaController: _mapaController),
         const SimpleAttributionWidget(
           source: Text('OpenStreetMap contributors'),
@@ -344,20 +345,6 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                         children: [
                       // Botão trocar sentido
                       if (!_dadosController.ehCircular && !_dadosController.unicaDirecao)
-                        // Padding(
-                        //   padding: const EdgeInsets.only(top: 8),
-                        //   child: TextButton(
-                        //     onPressed: _alternarSentido,
-                        //     style: TextButton.styleFrom(
-                        //       foregroundColor: Colors.blueAccent,
-                        //       overlayColor: Colors.blueAccent.withValues(alpha: 0.1),
-                        //     ),
-                        //     child: const Text(
-                        //       'Trocar sentido',
-                        //       style: TextStyle(fontSize: 16),
-                        //     ),
-                        //   ),
-                        // ),
                       // Botão de trocar sentido
                         SizedBox(
                           width: 180,

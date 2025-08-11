@@ -37,11 +37,11 @@ Widget buildDesktopFavoriteItem({
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.directions_bus_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  const Image(
+              image: AssetImage('assets/images/icon_bus.png'),
+        width: 20,
+        height: 20,
+      ),
                   const SizedBox(width: 6),
                   Text(
                     numero,

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 import '../../../theme/theme_provider.dart';
 
 class CentralizarLocalizacao extends StatelessWidget {
-  const CentralizarLocalizacao({super.key});
+  final MapController mapController;
+  const CentralizarLocalizacao({super.key, required this.mapController});
 
   @override
   Widget build(BuildContext context) {
     final tema = context.watch<ThemeProvider>();
 
     return Positioned(
-        bottom: 132,
+        bottom: 146,
         right: 24,
         child: FloatingActionButton.small(
           heroTag: 'Centralizar localização',
@@ -20,8 +24,19 @@ class CentralizarLocalizacao extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
           ),
           backgroundColor: tema.primary,
-          onPressed: () => (),
-          child: const Icon(Icons.my_location, color: Colors.white,),
+          onPressed: () async {
+            try {
+              final posicao = await LocalizacaoService.pegarLocalizacaoAtual();
+              mapController.move(
+                LatLng(posicao.latitude, posicao.longitude),
+                16.0,
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(e.toString())),
+              );
+            }
+          },          child: const Icon(Icons.my_location, color: Colors.white,),
         ));
   }
 }

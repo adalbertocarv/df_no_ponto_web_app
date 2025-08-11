@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../veiculos/mobile/mobile_veiculos.dart';
 
-Widget buildBottomNavigationBar(BuildContext context) {
+Widget buildBottomNavigationBar({
+  required int currentIndex,
+  required Function(int) onTap,
+}) {
   return Container(
     decoration: BoxDecoration(
       color: const Color(0xFF4A6FA5),
@@ -19,25 +21,25 @@ Widget buildBottomNavigationBar(BuildContext context) {
       backgroundColor: const Color(0xFF4A6FA5),
       selectedItemColor: Colors.white,
       unselectedItemColor: Colors.white70,
-      currentIndex: 0,
-      onTap: (index) {
-        if (index == 1) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => MapScreen()),
-          );
-        }
-      },
+      currentIndex: currentIndex,
+      onTap: onTap,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.directions_bus_rounded),
+          icon:                   const Image(
+            image: AssetImage('assets/images/icon_bus.png'),
+            width: 20,
+            height: 20,
+          ),
+          tooltip: 'Pesquisar Linhas',
           label: '',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.map),
+          tooltip: 'Veículos em Operação',
           label: '',
         ),
       ],
     ),
   );
 }
+

@@ -1,6 +1,5 @@
+import 'package:df_no_ponto_web_app/controller/home/main_navigation.dart';
 import 'package:flutter/material.dart';
-// Importe seus arquivos separados aqui:
-import 'mobile/mobile_home.dart';
 import 'desktop/desktop_home.dart';
 
 class ResponsiveHome extends StatelessWidget {
@@ -39,105 +38,9 @@ class ResponsiveFavoritesScreen extends StatelessWidget {
           return const DesktopHome();
         } else {
           // Mobile
-          return const MobileHome();
+          return const MainNavigation();
         }
       },
-    );
-  }
-}
-
-// Classe utilitária para detectar tipo de dispositivo
-class DeviceType {
-  static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < 768;
-  }
-
-  static bool isTablet(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    return width >= 768 && width < 1024;
-  }
-
-  static bool isDesktop(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 1024;
-  }
-
-  static bool isSmallScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width < 600;
-  }
-
-  static bool isLargeScreen(BuildContext context) {
-    return MediaQuery.of(context).size.width >= 1200;
-  }
-}
-
-// Classe para constantes responsivas
-class ResponsiveConstants {
-  // Breakpoints
-  static const double mobileBreakpoint = 768;
-  static const double tabletBreakpoint = 1024;
-  static const double desktopBreakpoint = 1200;
-
-  // Padding responsivo
-  static double getPadding(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width >= desktopBreakpoint) return 40;
-    if (width >= tabletBreakpoint) return 24;
-    return 16;
-  }
-
-  // Número de colunas para grids
-  static int getGridColumns(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width >= desktopBreakpoint) return 3;
-    if (width >= tabletBreakpoint) return 2;
-    return 1;
-  }
-
-  // Tamanho de fonte responsivo
-  static double getTitleFontSize(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width >= desktopBreakpoint) return 28;
-    if (width >= tabletBreakpoint) return 24;
-    return 18;
-  }
-
-  // Largura máxima do conteúdo
-  static double getMaxContentWidth(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width >= desktopBreakpoint) return 1200;
-    if (width >= tabletBreakpoint) return 800;
-    return double.infinity;
-  }
-}
-
-// Widget helper para centralizar conteúdo com largura máxima
-class ResponsiveContainer extends StatelessWidget {
-  final Widget child;
-  final double? maxWidth;
-  final EdgeInsetsGeometry? padding;
-
-  const ResponsiveContainer({
-    Key? key,
-    required this.child,
-    this.maxWidth,
-    this.padding,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: padding ?? EdgeInsets.symmetric(
-        horizontal: ResponsiveConstants.getPadding(context),
-      ),
-      child: Center(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: maxWidth ?? ResponsiveConstants.getMaxContentWidth(context),
-          ),
-          child: child,
-        ),
-      ),
     );
   }
 }

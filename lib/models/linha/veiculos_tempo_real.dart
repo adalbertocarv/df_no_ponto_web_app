@@ -76,11 +76,10 @@ class Feature {
               properties.busImage,
               width: 25,
               height: 25,
-              errorBuilder: (context, error, stackTrace) =>
-              const Icon(
-                Icons.directions_bus,
-                size: 20,
-                color: Colors.blueAccent,
+              errorBuilder: (context, error, stackTrace) =>                  const Image(
+                image: AssetImage('assets/images/icon_bus.png'),
+                width: 20,
+                height: 20,
               ),
             ),
           ),

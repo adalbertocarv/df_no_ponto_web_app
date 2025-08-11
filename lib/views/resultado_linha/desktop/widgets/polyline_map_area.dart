@@ -1,5 +1,5 @@
 import 'package:df_no_ponto_web_app/views/resultado_linha/desktop/widgets/centralizar_localizacao.dart';
-import 'package:df_no_ponto_web_app/views/resultado_linha/desktop/widgets/zoom_map.dart';
+import 'package:df_no_ponto_web_app/views/widgets/zoom_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -59,8 +59,10 @@ class DesktopMapArea extends StatelessWidget {
      return FlutterMap(
        mapController: mapController,
        options: MapOptions(
-         interactionOptions: const InteractionOptions(
-             flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+         interactionOptions: InteractionOptions(
+           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+           cursorKeyboardRotationOptions: CursorKeyboardRotationOptions.disabled(),
+         ),
          initialCenter: _fallbackCenter,
          initialZoom: _fallbackZoom,
          onMapReady: onMapReady,
@@ -77,7 +79,7 @@ class DesktopMapArea extends StatelessWidget {
          // Markers dos veículos por cima
          if (vehicleMarkers.isNotEmpty)
            MarkerLayer(markers: vehicleMarkers),
-         CentralizarLocalizacao(),
+         CentralizarLocalizacao(mapController: mapController,),
          ZoomControls(mapController: mapController),
          const SimpleAttributionWidget(
            source: Text('OpenStreetMap contributors'),

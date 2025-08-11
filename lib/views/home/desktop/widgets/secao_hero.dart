@@ -352,10 +352,10 @@ class _SecaoHeroState extends State<SecaoHero> {
             final isFavorited = favoritesProvider.isFavorite(numero);
 
             return ListTile(
-              leading: const Icon(
-                Icons.directions_bus,
-                color: Colors.blue,
-                size: 20,
+              leading:                   const Image(
+                image: AssetImage('assets/images/icon_bus_azul.png'),
+                width: 20,
+                height: 20,
               ),
               title: Text(
                 '$numero - $descricao',
@@ -382,10 +382,29 @@ class _SecaoHeroState extends State<SecaoHero> {
                   if (isFavorited) {
                     favoritesProvider.removeFavorite(numero);
                   } else {
-                    favoritesProvider.addFavorite({
+                    final sucesso = favoritesProvider.addFavorite({
                       'numero': numero,
                       'descricao': descricao,
                     });
+
+                    if (!sucesso) {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: const Text('Limite atingido'),
+                          content: const Text(
+                            'Você só pode salvar até 5 Linhas favoritas.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('OK', style: TextStyle(color: Colors.blueAccent),),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
                 },
               ),

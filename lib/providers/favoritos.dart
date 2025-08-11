@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesProvider with ChangeNotifier {
+  static const int maxFavorites = 5;
+
   List<Map<String, String>> _favorites = [];
 
   List<Map<String, String>> get favorites => _favorites;
@@ -22,13 +24,19 @@ class FavoritesProvider with ChangeNotifier {
   Future<void> _saveFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     final savedFavorites = _favorites.map((item) => _encodeMap(item)).toList();
-    prefs.setStringList('favorites', savedFavorites);
+    await prefs.setStringList('favorites', savedFavorites);
   }
 
-  void addFavorite(Map<String, String> linha) {
+  /// Tenta adicionar um favorito.
+  /// Retorna `true` se salvou com sucesso, `false` se atingiu o limite.
+  bool addFavorite(Map<String, String> linha) {
+    if (_favorites.length >= maxFavorites) {
+      return false; // Limite atingido
+    }
     _favorites.add(linha);
     _saveFavorites();
     notifyListeners();
+    return true;
   }
 
   void removeFavorite(String numero) {

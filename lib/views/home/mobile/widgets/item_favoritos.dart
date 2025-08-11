@@ -35,7 +35,11 @@ Widget buildFavoriteItem({
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.directions_bus_rounded, size: 20, color: Colors.white),
+          const Image(
+            image: AssetImage('assets/images/icon_bus.png'),
+            width: 20,
+            height: 20,
+          ),
           const SizedBox(width: 4),
           Text(
             numero,

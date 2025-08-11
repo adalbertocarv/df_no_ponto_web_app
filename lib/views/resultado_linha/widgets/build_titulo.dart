@@ -16,8 +16,11 @@ class TituloWidget extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.directions_bus_rounded, size: 20, color: Colors.white),
-          const SizedBox(width: 4),
+          const Image(
+            image: AssetImage('assets/images/icon_bus.png'),
+            width: 20,
+            height: 20,
+          ),          const SizedBox(width: 4),
           Text(
             numero,
             style: const TextStyle(fontSize: 14, color: Colors.white),

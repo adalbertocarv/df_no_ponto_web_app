@@ -1,9 +1,23 @@
+import 'package:df_no_ponto_web_app/views/veiculos/desktop/desktop_veiculos.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../veiculos/mobile/mobile_veiculos.dart';
+import '../../../veiculos/veiculos.dart';
 import 'nav_item.dart';
 
 Widget buildDesktopHeader(BuildContext context) {
+  Future<void> _abrirLink(String url) async {
+    final uri = Uri.parse(url);
+
+    // Para web, abrir em nova guia (_blank)
+    if (!await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+      webOnlyWindowName: '_blank',
+    )) {
+      throw 'Não foi possível abrir $url';
+    }
+  }
+
   return Container(
     height: 70,
     decoration: BoxDecoration(
@@ -30,10 +44,10 @@ Widget buildDesktopHeader(BuildContext context) {
           const Spacer(),
           Row(
             children: [
-              buildNavItem(Icons.map, 'Mapa', onTap: () {
+              buildNavItem(Icons.map, 'Veículos', onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MapScreen()),
+                  MaterialPageRoute(builder: (context) => DesktopVeiculos()),
                 );
               }),
               buildNavItem(Icons.language, 'GeoServer', onTap: () async {
@@ -51,7 +65,7 @@ Widget buildDesktopHeader(BuildContext context) {
 
               const SizedBox(width: 20),
               InkWell(
-                onTap: () => '',
+                onTap: () => _abrirLink('https://www.df.gov.br/'),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

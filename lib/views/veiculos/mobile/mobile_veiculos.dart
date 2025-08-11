@@ -1,507 +1,266 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../../../services/dados_espaciais/operadoras/bsbus.dart';
+import '../../../services/dados_espaciais/operadoras/marechal.dart';
+import '../../../services/dados_espaciais/operadoras/pioneira.dart';
+import '../../../services/dados_espaciais/operadoras/piracicabana.dart';
+import '../../../services/dados_espaciais/operadoras/urbi.dart';
+import '../../resultado_linha/mobile/widgets/centralizar_localizacao.dart';
+import '../../theme/theme_provider.dart';
+import '../widget/popup_veiculo.dart';
 
-class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+class MobileVeiculos extends StatefulWidget {
+  const MobileVeiculos({super.key});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<MobileVeiculos> createState() => _MobileVeiculosState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MobileVeiculosState extends State<MobileVeiculos> {
   final MapController _mapController = MapController();
-  LatLng? _currentLocation;
-  bool _isLoading = false;
-  bool _locationPermissionGranted = false;
+  final PopupController _popupController = PopupController();
 
-  // Localização padrão (Brasília - DF)
-  final LatLng _defaultLocation = const LatLng(-15.7942, -47.8822);
+  List<Marker> _markers = [];
+  bool _isLoading = true;
+  Timer? _timer;
 
-  // Lista de marcadores de exemplo (pontos de ônibus)
-  List<Marker> _busStopMarkers = [];
+  // Configurações do cluster
+  static const double _clusterRadius = 120;
+  static const Size _clusterSize = Size(40, 40);
+  static const EdgeInsets _clusterPadding = EdgeInsets.all(50);
+  static const LatLng brasiliaCenter = LatLng(-15.793823, -47.882688);
 
   @override
   void initState() {
     super.initState();
-    _initializeMap();
-  }
+    _carregarVeiculos();
 
-  Future<void> _initializeMap() async {
-    await _checkLocationPermission();
-    _createBusStopMarkers();
-    if (_locationPermissionGranted) {
-      await _getCurrentLocation();
-    }
-  }
-
-  Future<void> _checkLocationPermission() async {
-    final status = await Permission.location.status;
-
-    if (status.isDenied) {
-      final result = await Permission.location.request();
-      _locationPermissionGranted = result.isGranted;
-    } else {
-      _locationPermissionGranted = status.isGranted;
-    }
-
-    setState(() {});
-  }
-
-  Future<void> _getCurrentLocation() async {
-    if (!_locationPermissionGranted) {
-      _showLocationPermissionDialog();
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
+    // Atualiza automaticamente a cada 30 segundos
+    _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      _carregarVeiculos();
     });
+  }
+
+  @override
+  void dispose() {
+    // Cancela o timer para evitar execução depois que a tela for destruída
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _carregarVeiculos() async {
+    setState(() => _isLoading = true);
 
     try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
-      );
+      // Carrega dados de todas as operadoras
+      final futures = [
+        UrbiVeiculosService().buscarPosicaoUrbi(),
+        PiracicabanaVeiculosService().buscarPosicaoPiracicabana(),
+        PioneiraVeiculosService().buscarPosicaoPioneira(),
+        MarechalVeiculosService().buscarPosicaoMarechal(),
+        BsbusVeiculosService().buscarPosicaoBsbus(),
+      ];
 
-      _currentLocation = LatLng(position.latitude, position.longitude);
+      final results = await Future.wait(futures);
 
-      // Anima o mapa para a localização atual
-      _mapController.move(_currentLocation!, 15.0);
+      // Combina todos os veículos
+      final allMarkers = <Marker>[];
+
+      for (var veiculosOperadora in results) {
+        for (var feature in veiculosOperadora.features) {
+          final coords = feature.geometry.coordinates;
+
+          // Validação de coordenadas
+          if (coords.length >= 2) {
+            final lat = coords[1];
+            final lng = coords[0];
+
+            // Coordenadas válidas para o Brasil
+            if (lat != 0.0 &&
+                lng != 0.0 &&
+                lat >= -35.0 &&
+                lat <= 6.0 &&
+                lng >= -75.0 &&
+                lng <= -30.0) {
+              allMarkers.add(
+                Marker(
+                  point: LatLng(lat, lng),
+                  width: 40,
+                  height: 40,
+                  key: ValueKey(feature),
+                  child: Image.asset(
+                    feature.properties.busImage,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return                   const Image(
+                        image: AssetImage('assets/images/icon_bus.png'),
+                        width: 20,
+                        height: 20,
+                      );
+                    },
+                  ),
+                ),
+              );
+            }
+          }
+        }
+            }
 
       setState(() {
-        _isLoading = false;
+        _markers = allMarkers;
       });
-
-      _showLocationFoundSnackBar();
-
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      _showLocationErrorDialog();
+      debugPrint("Erro ao carregar veículos: $e");
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
-
-  void _createBusStopMarkers() {
-    // Pontos de ônibus fictícios em Brasília
-    final busStops = [
-      {'name': 'Rodoviária do Plano Piloto', 'lat': -15.7942, 'lng': -47.8822},
-      {'name': 'Estação Central', 'lat': -15.7801, 'lng': -47.9292},
-      {'name': 'Ceilândia Centro', 'lat': -15.8198, 'lng': -48.1067},
-      {'name': 'Taguatinga Centro', 'lat': -15.8270, 'lng': -48.0441},
-      {'name': 'Samambaia Norte', 'lat': -15.8759, 'lng': -48.0935},
-    ];
-
-  }
-
-  void _showBusStopInfo(String name) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.directions_bus, color: const Color(0xFF4A6FA5)),
-            const SizedBox(width: 8),
-            const Text('Ponto de Ônibus'),
-          ],
-        ),
-        content: Text(name),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Aqui você pode adicionar lógica para mostrar rotas, horários, etc.
-              _showRouteOptions(name);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4A6FA5),
-            ),
-            child: const Text('Ver Rotas', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRouteOptions(String stopName) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Consultando rotas para $stopName...'),
-        backgroundColor: const Color(0xFF4A6FA5),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
-  }
-
-  void _showLocationPermissionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.location_off, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Permissão Necessária'),
-          ],
-        ),
-        content: const Text(
-          'Para centralizar no seu local, precisamos acessar sua localização. '
-              'Vá nas configurações e permita o acesso à localização.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              openAppSettings();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4A6FA5),
-            ),
-            child: const Text('Configurações', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLocationErrorDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.error, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Erro de Localização'),
-          ],
-        ),
-        content: const Text(
-          'Não foi possível obter sua localização. '
-              'Verifique se o GPS está ativado e tente novamente.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLocationFoundSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Localização encontrada!'),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
 
   @override
   Widget build(BuildContext context) {
+    final tema = context.watch<ThemeProvider>();
     return Scaffold(
-
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Mapa
-          FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentLocation ?? _defaultLocation,
-              initialZoom: _currentLocation != null ? 15.0 : 11.0,
-              minZoom: 8.0,
-              maxZoom: 18.0,
-
-              interactionOptions: const InteractionOptions(
-                enableMultiFingerGestureRace: true,
-                flags:
-                InteractiveFlag.doubleTapDragZoom |
-                InteractiveFlag.doubleTapZoom |
-                InteractiveFlag.drag |
-                InteractiveFlag.flingAnimation |
-                InteractiveFlag.pinchZoom |
-                InteractiveFlag.scrollWheelZoom,
-              ),
-            ),
-            children: [
-              // Camada do mapa base
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.df.no.ponto.df_no_ponto_web_app',
-                maxZoom: 18,
-              ),
-
-            ],
-          ),
-          Positioned(
-            left: 16,
-            top: 16,
-            child: Container(
-              height: 60,
-              width: 60,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color:  const Color(0xFF4A6FA5),
-              ),
-              child: FloatingActionButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
+          PopupScope(
+            popupController: _popupController,
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                interactionOptions: InteractionOptions(
+                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                  cursorKeyboardRotationOptions: CursorKeyboardRotationOptions.disabled(),
                 ),
-                backgroundColor:const Color(0xFF4A6FA5),
-                child: const Icon(Icons.arrow_back, color: Colors.white,),
-                onPressed: () {Navigator.pop(context);},
+                initialCenter: brasiliaCenter,
+                initialZoom: 13.0,
+                onTap: (_, __) {
+                  _popupController.hideAllPopups();
+                },
+                maxZoom: 20,
+                minZoom: 9.5,
               ),
-            )
-          ),
-          // Botões flutuantes
-          Positioned(
-            right: 16,
-            bottom: 100,
-            child: Column(
               children: [
-                // Botão para centralizar na localização do usuário
-                FloatingActionButton(
-                  heroTag: "location",
-                  onPressed: _isLoading ? null : _getCurrentLocation,
-                  backgroundColor: _locationPermissionGranted
-                      ? const Color(0xFF4A6FA5)
-                      : Colors.grey,
-                  child: _isLoading
-                      ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                      : const Icon(Icons.my_location, color: Colors.white),
+                TileLayer(
+                  tileProvider: CancellableNetworkTileProvider(),
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.df.no.ponto.df_no_ponto_web_app',
                 ),
-
-                const SizedBox(height: 12),
-
-                // Botão para mostrar todos os pontos
-                FloatingActionButton(
-                  heroTag: "show_all",
-                  onPressed: () {
-                    if (_busStopMarkers.isNotEmpty) {
-                      // Calcula bounds para mostrar todos os marcadores
-                      double minLat = _busStopMarkers.first.point.latitude;
-                      double maxLat = _busStopMarkers.first.point.latitude;
-                      double minLng = _busStopMarkers.first.point.longitude;
-                      double maxLng = _busStopMarkers.first.point.longitude;
-
-                      for (var marker in _busStopMarkers) {
-                        if (marker.point.latitude < minLat) minLat = marker.point.latitude;
-                        if (marker.point.latitude > maxLat) maxLat = marker.point.latitude;
-                        if (marker.point.longitude < minLng) minLng = marker.point.longitude;
-                        if (marker.point.longitude > maxLng) maxLng = marker.point.longitude;
-                      }
-
-                      final bounds = LatLngBounds(
-                        LatLng(minLat, minLng),
-                        LatLng(maxLat, maxLng),
+                MarkerClusterLayerWidget(
+                  options: MarkerClusterLayerOptions(
+                    maxClusterRadius: _clusterRadius.toInt(),
+                    size: _clusterSize,
+                    padding: _clusterPadding,
+                    markers: _markers,
+                    builder: (context, markers) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.blue,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            markers.length.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       );
+                    },
+                    popupOptions: PopupOptions(
+                      popupController: _popupController,
+                      popupBuilder: (_, marker) {
+                        final feature = (marker.key as ValueKey).value;
 
-                      // _mapController.fitBounds(
-                      //   bounds,
-                      //   options: const FitBoundsOptions(
-                      //     padding: EdgeInsets.all(50),
-                      //   ),
-                      // );
-                    }
-                  },
-                  backgroundColor: Colors.orange,
-                  child: const Icon(Icons.center_focus_strong, color: Colors.white),
+                        return CustomPopup(
+                          dadosVeiculo: {
+                            'nm_operadora': feature.properties.nomeOperadora,
+                            'prefixo': feature.properties.veiculo.prefixo,
+                            'sentido': feature.properties.veiculo.sentido,
+                            'datalocal': feature.properties.datalocal,
+                          },
+                          popupController: _popupController,
+                          linha: feature.properties.veiculo.numero,
+                          onClose: () {
+                            _popupController.hideAllPopups(); // Fecha o popup
+                          },
+                        );
+                      },
+                    ),
+                    showPolygon: true, // Exibe o polígono de agrupamento
+                    polygonOptions: PolygonOptions(
+                      borderColor: Colors.blue, // Cor da borda do polígono
+                      borderStrokeWidth: 3, // Largura da borda
+                      color: Colors.blue.withValues(
+                          alpha: 0.2), // Cor de preenchimento com opacidade
+                    ),
+                  ),
+                ),
+                const SimpleAttributionWidget(
+                  source: Text('OpenStreetMap contributors'),
                 ),
               ],
             ),
           ),
 
-          // Indicador de carregamento quando necessário
+          // Loading indicator
           if (_isLoading)
-            Container(
-              color: Colors.black26,
-              child: const Center(
-                child: Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Obtendo localização...'),
-                      ],
-                    ),
-                  ),
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Colors.black26,
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
             ),
-        ],
-      ),
+          CentralizarLocalizacao(
+            mapController: _mapController,
+          ),
 
-      // Drawer com informações adicionais
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
+          // Debug info
+          Positioned(
+            top: 50,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Color(0xFF4A6FA5),
+                color: Colors.black.withValues(alpha: 0.7),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.map, color: Colors.white, size: 48),
-                  SizedBox(height: 16),
-                  Text(
-                    'Mapa Interativo',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'Transporte Público DF',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              child: Text(
+                'Veículos: ${_markers.length}',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.directions_bus),
-              title: const Text('Pontos de Ônibus'),
-              subtitle: Text('${_busStopMarkers.length} pontos encontrados'),
-              onTap: () {
-                Navigator.pop(context);
-                // Lógica para filtrar apenas pontos de ônibus
-              },
+          ),
+          Positioned(
+            top: 150,
+            right: 16,
+            child: FloatingActionButton.small(
+              heroTag: 'Recarregar_veículos',
+              tooltip: 'Recarregar veículos',
+              backgroundColor: tema.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              onPressed: _carregarVeiculos,
+              child: const Icon(
+                Icons.refresh,
+                color: Colors.white,
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.route),
-              title: const Text('Rotas'),
-              subtitle: const Text('Ver todas as rotas disponíveis'),
-              onTap: () {
-                Navigator.pop(context);
-                // Lógica para mostrar rotas
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.favorite),
-              title: const Text('Favoritos'),
-              subtitle: const Text('Seus locais favoritos'),
-              onTap: () {
-                Navigator.pop(context);
-                // Lógica para mostrar favoritos
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Configurações'),
-              onTap: () {
-                Navigator.pop(context);
-                _showSettings();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showMapLayerOptions() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Opções do Mapa'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.map),
-              title: const Text('Mapa Padrão'),
-              onTap: () {
-                Navigator.pop(context);
-                // Trocar para mapa padrão
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.satellite),
-              title: const Text('Visão Satélite'),
-              onTap: () {
-                Navigator.pop(context);
-                // Trocar para visão satélite
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.terrain),
-              title: const Text('Relevo'),
-              onTap: () {
-                Navigator.pop(context);
-                // Trocar para mapa de relevo
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showSettings() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Configurações do Mapa'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Permissão de localização: ${_locationPermissionGranted ? "Concedida" : "Negada"}'),
-            const SizedBox(height: 8),
-            Text('Localização atual: ${_currentLocation != null ? "Disponível" : "Indisponível"}'),
-            const SizedBox(height: 8),
-            Text('Pontos de ônibus: ${_busStopMarkers.length}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
           ),
         ],
       ),
     );
   }
 }
-

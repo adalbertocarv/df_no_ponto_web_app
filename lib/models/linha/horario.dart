@@ -108,9 +108,11 @@ class Horario {
       case 'NNSSSNN':
         return 'QUARTA-SEXTA';
       case 'SSSSNSN':
-        return 'SEGUNDA-SEXTA + SÁBADO';
+        return 'SEGUNDA-QUINTA + SÁBADO';
       case 'SSSSNNS':
-        return 'SEGUNDA-SEXTA + DOMINGO';
+        return 'SEGUNDA-QUINTA + DOMINGO';
+      case 'SSSSSSN':
+        return 'SEGUNDA-SÁBADO';
 
     // Padrões especiais conhecidos
       case 'SNNNNNS':

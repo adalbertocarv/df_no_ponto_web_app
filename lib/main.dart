@@ -27,8 +27,18 @@ class DfNoPontoWebApp extends StatelessWidget {
       title: 'DF no Ponto - SEMOB',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Colors.blueAccent,          // cor do cursor
+          selectionColor: Colors.blueAccent,       // cor da seleção de texto
+          selectionHandleColor: Colors.blueAccent, // cor do marcador de seleção
+        ),
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-      ),      home: const ResponsiveHome(),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: Colors.blueAccent,
+        ),
+      ),
+      home: const ResponsiveHome(),
     );
   }
 }

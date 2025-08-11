@@ -8,7 +8,6 @@ import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
 import '../../../providers/favoritos.dart';
 import '../../resultado_linha/resultado_linha.dart';
 import '../widgets/campo_busca_linha.dart';
-import 'widgets/bottom_navigation.dart';
 import 'widgets/item_favoritos.dart';
 import 'widgets/card_noticias.dart';
 
@@ -166,7 +165,6 @@ class _MobileHomeState extends State<MobileHome> {
             if (_shouldShowOverlay()) _buildOverlay(),
           ],
         ),
-        bottomNavigationBar: buildBottomNavigationBar(context),
       ),
     );
   }
@@ -230,7 +228,7 @@ class _MobileHomeState extends State<MobileHome> {
                   children: favoritos.isEmpty
                       ? [
                     const Text(
-                      'Salve suas linhas favoritas \n para exibir elas aqui.',
+                      'Salve suas linhas favoritas \n para exibi-las aqui.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -444,10 +442,10 @@ class _MobileHomeState extends State<MobileHome> {
             final isFavorited = favoritesProvider.isFavorite(numero);
 
             return ListTile(
-              leading: const Icon(
-                Icons.directions_bus,
-                color: Colors.blue,
-                size: 20,
+              leading:                   const Image(
+                image: AssetImage('assets/images/icon_bus_azul.png'),
+                width: 20,
+                height: 20,
               ),
               title: Text(
                 '$numero - $descricao',
@@ -472,10 +470,29 @@ class _MobileHomeState extends State<MobileHome> {
                   if (isFavorited) {
                     favoritesProvider.removeFavorite(numero);
                   } else {
-                    favoritesProvider.addFavorite({
+                    final sucesso = favoritesProvider.addFavorite({
                       'numero': numero,
                       'descricao': descricao,
                     });
+
+                    if (!sucesso) {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: const Text('Limite atingido'),
+                          content: const Text(
+                            'Você só pode salvar até 5 Linhas favoritas.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('OK', style: TextStyle(color: Colors.blueAccent),),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
                 },
               ),
