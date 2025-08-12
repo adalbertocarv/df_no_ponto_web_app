@@ -3,9 +3,9 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"assets/AssetManifest.bin": "97deb2a72a0b47187c74d56e071be01b",
-"assets/AssetManifest.bin.json": "3603b67f397be4c480f20774d9f32df8",
-"assets/AssetManifest.json": "eaa1fd1da116bcf59d959065ea4a81fc",
+const RESOURCES = {"assets/AssetManifest.bin": "ece917bebe0fec963d254e72bba9461b",
+"assets/AssetManifest.bin.json": "dd44eeca414ff9facc19d64d1b484160",
+"assets/AssetManifest.json": "a40fbfe7a076f185efbdda46e2a210d0",
 "assets/assets/images/brasilia.png": "686df260c19fc55fe1811f631637f095",
 "assets/assets/images/bus.png": "0d5507b9bd1bbb2da0ccf8214ceb51f2",
 "assets/assets/images/BusStop.png": "4fe55d1e5f7757a1f78100ed990a4814",
@@ -21,7 +21,6 @@ const RESOURCES = {"assets/AssetManifest.bin": "97deb2a72a0b47187c74d56e071be01b
 "assets/assets/images/sao_joseBus.png": "3d85a3d3dd69ae952e4459575367b209",
 "assets/assets/images/urbiBus.png": "817e5e570e8cab8c17c4236167fe67fe",
 "assets/assets/images/user.png": "e33f29558d4af59e50aa4f63a77e5317",
-"assets/assets/images/user_location.png": "f8614826090c6b2f0de6383f47cfe598",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/fonts/MaterialIcons-Regular.otf": "bef0cd018f02d1380c333e687763d3c4",
 "assets/NOTICES": "bab565e0202f2eb9998c570aad690439",
@@ -39,14 +38,14 @@ const RESOURCES = {"assets/AssetManifest.bin": "97deb2a72a0b47187c74d56e071be01b
 "canvaskit/skwasm.wasm": "39dd80367a4e71582d234948adc521c0",
 "favicon.png": "82e8f7e03cd63a3adc15d4ef197b839f",
 "flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
-"flutter_bootstrap.js": "9b42a632d1c38fb98092a46c634aaa20",
+"flutter_bootstrap.js": "deb5fd1e6a5587b6514b85d39195b1e9",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "index.html": "aa0ba67febf0d70ba465cd82bd2bad2d",
 "/": "aa0ba67febf0d70ba465cd82bd2bad2d",
-"main.dart.js": "6082e414a66598d62761aa0d565142cb",
+"main.dart.js": "71e4893a2c8629ac17083743470e9b81",
 "manifest.json": "02d63fab6bbfbe303b7e57e0fe9b2c49",
 "version.json": "96656584df42ce7af7edbe2b9daf30d5"};
 // The application shell files that are downloaded before a service worker can

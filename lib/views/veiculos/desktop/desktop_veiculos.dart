@@ -7,6 +7,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../services/dados_espaciais/linha/itinerario_espacial_completo.dart';
+import '../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 import '../../../services/dados_espaciais/operadoras/bsbus.dart';
 import '../../../services/dados_espaciais/operadoras/marechal.dart';
 import '../../../services/dados_espaciais/operadoras/pioneira.dart';
@@ -53,6 +54,7 @@ class _DesktopVeiculosState extends State<DesktopVeiculos> {
   static const Size _clusterSize = Size(40, 40);
   static const EdgeInsets _clusterPadding = EdgeInsets.all(50);
   static const LatLng BRASILIA_CENTER = LatLng(-15.793823, -47.882688);
+  LatLng? _userLocation;
 
   // Getter para markers filtrados
   List<Marker> get _filteredMarkers {
@@ -71,10 +73,21 @@ class _DesktopVeiculosState extends State<DesktopVeiculos> {
   // Instância do service de percurso
   final PercursoCompletoService _percursoService = PercursoCompletoService();
 
+  Future<void> _obterLocalizacaoInicial() async {
+    final resultado = await LocalizacaoUsuarioService().obterLocalizacaoUsuario();
+
+    if (resultado.status == LocalizacaoStatus.sucesso && resultado.localizacao != null) {
+      setState(() {
+        _userLocation = resultado.localizacao;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadVeiculos();
+    _obterLocalizacaoInicial();
 
     // Atualiza automaticamente a cada 30 segundos
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
@@ -358,7 +371,25 @@ class _DesktopVeiculosState extends State<DesktopVeiculos> {
                       );
                     }).toList(),
                   ),
-
+                MarkerLayer(
+                  markers: [
+                    if (_userLocation != null)
+                      Marker(
+                        point: _userLocation!,
+                        width: 50,
+                        height: 50,
+                        child: Transform.translate(
+                          offset: const Offset(0, -22),
+                          child: Image.asset(
+                            'assets/images/user.png',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 MarkerClusterLayerWidget(
                   options: MarkerClusterLayerOptions(
                     maxClusterRadius: _clusterRadius.toInt(),

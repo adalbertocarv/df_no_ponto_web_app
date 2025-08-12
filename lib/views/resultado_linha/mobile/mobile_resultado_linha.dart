@@ -10,6 +10,7 @@ import '../../../controller/resultado_linha/mapa_linha_controller.dart';
 import '../../../controller/resultado_linha/resultado_linha_controller.dart';
 import '../../../models/linha/horario.dart';
 import '../../../models/linha/veiculos_tempo_real.dart';
+import '../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 import '../widgets/build_titulo.dart';
 import '../widgets/favorite_button.dart';
 
@@ -32,10 +33,22 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
 
   static const _fallbackCenter = LatLng(-15.7942, -47.8822);
   static const _fallbackZoom = 12.0;
+  LatLng? _userLocation;
+
+  Future<void> _obterLocalizacaoInicial() async {
+    final resultado = await LocalizacaoUsuarioService().obterLocalizacaoUsuario();
+
+    if (resultado.status == LocalizacaoStatus.sucesso && resultado.localizacao != null) {
+      setState(() {
+        _userLocation = resultado.localizacao;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _obterLocalizacaoInicial();
     _dadosController = ResultadoLinhaController(widget.numero);
     _mapaController = ResultadoMapaController(widget.numero);
 
@@ -263,6 +276,25 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         // Markers dos veículos por cima
         if (vehicleMarkers.isNotEmpty)
           MarkerLayer(markers: vehicleMarkers),
+        MarkerLayer(
+          markers: [
+            if (_userLocation != null)
+              Marker(
+                point: _userLocation!,
+                width: 50,
+                height: 50,
+                child: Transform.translate(
+                  offset: const Offset(0, -22),
+                  child: Image.asset(
+                    'assets/images/user.png',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+          ],
+        ),
         CentralizarLocalizacao(mapController: _map, top: 100,right: 16,),
         CentralizarPolylines(mapaController: _mapaController),
         const SimpleAttributionWidget(

@@ -7,6 +7,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../services/dados_espaciais/linha/itinerario_espacial_completo.dart';
+import '../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 import '../../../services/dados_espaciais/operadoras/bsbus.dart';
 import '../../../services/dados_espaciais/operadoras/marechal.dart';
 import '../../../services/dados_espaciais/operadoras/pioneira.dart';
@@ -30,6 +31,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
 
   List<Marker> _markers = [];
   bool _isLoading = true;
+  LatLng? _userLocation;
 
   // Variáveis para controle de linhas e percursos
   Map<String, List<LatLng>> _percursosCarregados = {};
@@ -69,10 +71,21 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
   // Instância do service de percurso
   final PercursoCompletoService _percursoService = PercursoCompletoService();
 
+  Future<void> _obterLocalizacaoInicial() async {
+    final resultado = await LocalizacaoUsuarioService().obterLocalizacaoUsuario();
+
+    if (resultado.status == LocalizacaoStatus.sucesso && resultado.localizacao != null) {
+      setState(() {
+        _userLocation = resultado.localizacao;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadVeiculos();
+    _obterLocalizacaoInicial();
 
     // Atualiza automaticamente a cada 30 segundos
     _timer = Timer.periodic(const Duration(seconds: 30), (timer) {
@@ -354,7 +367,25 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                       );
                     }).toList(),
                   ),
-
+                MarkerLayer(
+                  markers: [
+                    if (_userLocation != null)
+                      Marker(
+                        point: _userLocation!,
+                        width: 50,
+                        height: 50,
+                        child: Transform.translate(
+                          offset: const Offset(0, -22),
+                          child: Image.asset(
+                            'assets/images/user.png',
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 MarkerClusterLayerWidget(
                   options: MarkerClusterLayerOptions(
                     maxClusterRadius: _clusterRadius.toInt(),
@@ -602,11 +633,23 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                 ),
               ),
             ),
-
           CentralizarLocalizacao(
-            mapController: _mapController, top: 300,right: 16,
+            mapController: _mapController,
+            top: 300,
+            right: 16,
           ),
 
+          CentralizarLocalizacao(
+            mapController: _mapController,
+            top: 300,
+            right: 16,
+            // NOVO: Adicione o callback para capturar a localização
+            onLocationObtained: (LatLng location) {
+              setState(() {
+                _userLocation = location;
+              });
+            },
+          ),
           // Debug info
           Positioned(
             bottom: 16,

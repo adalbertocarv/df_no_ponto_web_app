@@ -6,9 +6,10 @@ import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_ti
 import 'package:latlong2/latlong.dart';
 import '../../../../controller/resultado_linha/resultado_linha_controller.dart';
 import '../../../../models/linha/veiculos_tempo_real.dart';
+import '../../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 
-class DesktopMapArea extends StatelessWidget {
-   const DesktopMapArea({
+class DesktopMapArea extends StatefulWidget {
+    DesktopMapArea({
     super.key,
     required this.dadosController,
     required this.mapController,
@@ -18,19 +19,41 @@ class DesktopMapArea extends StatelessWidget {
   final ResultadoLinhaController dadosController;
   final MapController mapController;
   final VoidCallback onMapReady;
-
   static const _fallbackCenter = LatLng(-15.7942, -47.8822);
   static const _fallbackZoom = 12.0;
 
   @override
+  State<DesktopMapArea> createState() => _DesktopMapAreaState();
+}
+
+class _DesktopMapAreaState extends State<DesktopMapArea> {
+   LatLng? _userLocation;
+
+    Future<void> _obterLocalizacaoInicial() async {
+      final resultado = await LocalizacaoUsuarioService().obterLocalizacaoUsuario();
+
+      if (resultado.status == LocalizacaoStatus.sucesso && resultado.localizacao != null) {
+        setState(() {
+          _userLocation = resultado.localizacao;
+        });
+      }
+    }
+
+    @override
+    void initState(){
+      super.initState();
+      _obterLocalizacaoInicial();
+    }
+
+  @override
   Widget build(BuildContext context) {
-    if (dadosController.carregando) {
+    if (widget.dadosController.carregando) {
       return const Center(
         child: CircularProgressIndicator(strokeWidth: 2),
       );
     }
 
-    final percursos = dadosController.percursos;
+    final percursos = widget.dadosController.percursos;
     if (percursos == null || percursos.isEmpty) {
       return const Center(
         child: Text(
@@ -45,9 +68,9 @@ class DesktopMapArea extends StatelessWidget {
   }
 
    Widget _buildMap(BuildContext context) {
-     final percursosExibidos = dadosController.percursosExibidos;
+     final percursosExibidos = widget.dadosController.percursosExibidos;
      final layers = _buildPolylineLayers(percursosExibidos);
-     final veiculosExibidos = dadosController.veiculosExibidos;
+     final veiculosExibidos = widget.dadosController.veiculosExibidos;
 
      // Cria os markers dos veículos
      final vehicleMarkers = veiculosExibidos.map((veiculo) =>
@@ -57,15 +80,15 @@ class DesktopMapArea extends StatelessWidget {
      ).toList();
 
      return FlutterMap(
-       mapController: mapController,
+       mapController: widget.mapController,
        options: MapOptions(
          interactionOptions: InteractionOptions(
            flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
            cursorKeyboardRotationOptions: CursorKeyboardRotationOptions.disabled(),
          ),
-         initialCenter: _fallbackCenter,
-         initialZoom: _fallbackZoom,
-         onMapReady: onMapReady,
+         initialCenter: DesktopMapArea._fallbackCenter,
+         initialZoom: DesktopMapArea._fallbackZoom,
+         onMapReady: widget.onMapReady,
          maxZoom: 20,
          minZoom: 9.5,
        ),
@@ -79,16 +102,33 @@ class DesktopMapArea extends StatelessWidget {
          // Markers dos veículos por cima
          if (vehicleMarkers.isNotEmpty)
            MarkerLayer(markers: vehicleMarkers),
-         CentralizarLocalizacao(mapController: mapController, bottom: 136, right: 24,),
-         ZoomControls(mapController: mapController),
+         MarkerLayer(
+           markers: [
+             if (_userLocation != null)
+               Marker(
+                 point: _userLocation!,
+                 width: 50,
+                 height: 50,
+                 child: Transform.translate(
+                   offset: const Offset(0, -22),
+                   child: Image.asset(
+                     'assets/images/user.png',
+                     width: 40,
+                     height: 40,
+                     fit: BoxFit.contain,
+                   ),
+                 ),
+               ),
+           ],
+         ),
+         CentralizarLocalizacao(mapController: widget.mapController, bottom: 136, right: 24,),
+         ZoomControls(mapController: widget.mapController),
          const SimpleAttributionWidget(
            source: Text('OpenStreetMap contributors'),
          ),
        ],
      );
    }
-
-
 
    List _buildPolylineLayers(Map percursos) {
     return percursos.entries.expand((entry) {
@@ -157,7 +197,7 @@ class DesktopMapArea extends StatelessWidget {
                Navigator.of(context).pop();
                final coords = veiculo.geometry.coordinates;
                if (coords.length >= 2) {
-                 mapController.move(LatLng(coords[1], coords[0]), 18);
+                 widget.mapController.move(LatLng(coords[1], coords[0]), 18);
                }
              },
              child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent),),
