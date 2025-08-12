@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../models/pesquisa_linha/pesquisa_linha_model.dart';
 import '../../../../services/pesquisa_linha/pesquisa_linha.dart';
-import '../../../providers/favoritos.dart';
+import '../../../providers/favoritos_linha.dart';
 import '../../resultado_linha/resultado_linha.dart';
 import '../widgets/campo_busca_linha.dart';
 import 'widgets/item_favoritos.dart';

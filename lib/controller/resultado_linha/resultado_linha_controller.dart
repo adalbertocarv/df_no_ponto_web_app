@@ -135,7 +135,7 @@ class ResultadoLinhaController extends ChangeNotifier {
       horarios = results[3] as List<HorarioModel>;
       itinerarioDescritivo = results[4] as List<ItinerarioModel>;
 
-      // 🚀 Determinação explícita do tipo de linha:
+      //  Determinação explícita do tipo de linha:
       final sentidos = percursos!.map((k, v) => MapEntry(k.toUpperCase(), v));
 
       final rawMapas = percursos!;

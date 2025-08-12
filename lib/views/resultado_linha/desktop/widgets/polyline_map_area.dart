@@ -79,7 +79,7 @@ class DesktopMapArea extends StatelessWidget {
          // Markers dos veículos por cima
          if (vehicleMarkers.isNotEmpty)
            MarkerLayer(markers: vehicleMarkers),
-         CentralizarLocalizacao(mapController: mapController,),
+         CentralizarLocalizacao(mapController: mapController, bottom: 136, right: 24,),
          ZoomControls(mapController: mapController),
          const SimpleAttributionWidget(
            source: Text('OpenStreetMap contributors'),
@@ -119,51 +119,66 @@ class DesktopMapArea extends StatelessWidget {
     }
   }
 
-  void _showVehicleDetails(BuildContext context, Feature veiculo) {
-    final props = veiculo.properties;
+   void _showVehicleDetails(BuildContext context, Feature veiculo) {
+     final props = veiculo.properties;
+     final datalocal = props.datalocal ?? 'N/A';
+     final dataFormatada = formatarDataHora(datalocal);
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text('Veículo ${props.prefixo ?? 'N/A'}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (props.nm_operadora != null)
-              Text('Operadora: ${props.nm_operadora}'),
-            if (props.cdLinha != null)
-              Text('Código da Linha: ${props.cdLinha}'),
-            if (props.velocidade != null)
-              Text('Velocidade: ${props.velocidade} km/h'),
-            if (props.direcao != null)
-              Text('Direção: ${props.direcao}'),
-            if (props.datalocal != null)
-              Text('Última atualização: ${props.datalocal}'),
-            const SizedBox(height: 8),
-            Text('Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}'),
-            if (props.sentido != null)
-              Text('Sentido: ${props.sentido}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar', style: TextStyle(color: Colors.blueAccent),),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              final coords = veiculo.geometry.coordinates;
-              if (coords.length >= 2) {
-                mapController.move(LatLng(coords[1], coords[0]), 18);
-              }
-            },
-            child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent),),
-          ),
-        ],
-      ),
-    );
-  }
+     showDialog(
+       context: context,
+       builder: (context) => AlertDialog(
+         backgroundColor: Colors.white,
+         title: Text('Veículo ${props.prefixo ?? 'N/A'}'),
+         content: Column(
+           mainAxisSize: MainAxisSize.min,
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             if (props.nm_operadora != null)
+               Text('Operadora: ${props.nm_operadora}'),
+             if (props.cdLinha != null)
+               Text('Código da Linha: ${props.cdLinha}'),
+             if (props.velocidade != null)
+               Text('Velocidade: ${props.velocidade} km/h'),
+             // if (props.direcao != null)
+             //   Text('Direção: ${props.direcao}'),
+             if (props.datalocal != null)
+               Text('Última atualização: ${dataFormatada}'),
+             const SizedBox(height: 8),
+             Text('Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}'),
+           ],
+         ),
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(context).pop(),
+             child: const Text('Fechar', style: TextStyle(color: Colors.blueAccent),),
+           ),
+           TextButton(
+             onPressed: () {
+               Navigator.of(context).pop();
+               final coords = veiculo.geometry.coordinates;
+               if (coords.length >= 2) {
+                 mapController.move(LatLng(coords[1], coords[0]), 18);
+               }
+             },
+             child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent),),
+           ),
+         ],
+       ),
+     );
+   }
+
+   /// Formata a data e hora para exibição amigável
+   String formatarDataHora(String datalocal) {
+     try {
+       final dateTime = DateTime.parse(datalocal);
+       return '${dateTime.day.toString().padLeft(2, '0')}/'
+           '${dateTime.month.toString().padLeft(2, '0')}/'
+           '${dateTime.year} às '
+           '${dateTime.hour.toString().padLeft(2, '0')}:'
+           '${dateTime.minute.toString().padLeft(2, '0')}:'
+           '${dateTime.second.toString().padLeft(2, '0')}';
+     } catch (e) {
+       return 'Data inválida';
+     }
+   }
 }

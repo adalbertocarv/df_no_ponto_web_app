@@ -1,27 +1,35 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
-class LocalizacaoService {
-  static Future<Position> pegarLocalizacaoAtual() async {
-    bool servicoAtivo = await Geolocator.isLocationServiceEnabled();
-    if (!servicoAtivo) {
-      throw Exception('Serviço de localização desativado.');
+class LocalizacaoUsuarioService {
+  // Método para obter a localização do usuário
+  Future<LatLng?> obterLocalizacaoUsuario() async {
+    // Verifica se o serviço de localização está habilitado
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return null; // Serviço de localização desativado
     }
 
-    LocationPermission permissao = await Geolocator.checkPermission();
-    if (permissao == LocationPermission.denied) {
-      permissao = await Geolocator.requestPermission();
-      if (permissao == LocationPermission.denied) {
-        throw Exception('Permissão de localização negada.');
+    // Verifica as permissões de localização
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null; // Permissão negada
       }
     }
 
-    if (permissao == LocationPermission.deniedForever) {
-      throw Exception(
-          'Permissão de localização permanentemente negada. Vá nas configurações para ativar.');
+    if (permission == LocationPermission.deniedForever) {
+      // O usuário bloqueou permanentemente o acesso à localização
+      return null;
     }
 
-    return await Geolocator.getCurrentPosition(
+    // Obtém a posição atual do usuário
+    Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
+
+    // Retorna a localização em formato LatLng
+    return LatLng(position.latitude, position.longitude);
   }
 }

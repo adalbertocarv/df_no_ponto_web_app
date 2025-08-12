@@ -19,9 +19,10 @@ class VeiculosTempoReal {
 
   /// Filtra veículos por sentido (IDA ou VOLTA)
   List<Feature> veiculosPorSentido(String sentido) {
-    return features.where((feature) =>
-    feature.properties.sentido?.toUpperCase() == sentido.toUpperCase()
-    ).toList();
+    return features
+        .where((feature) =>
+            feature.properties.sentido?.toUpperCase() == sentido.toUpperCase())
+        .toList();
   }
 
   /// Retorna todos os veículos para linhas circulares ou unidirecionais
@@ -65,7 +66,7 @@ class Feature {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -76,7 +77,7 @@ class Feature {
               properties.busImage,
               width: 25,
               height: 25,
-              errorBuilder: (context, error, stackTrace) =>                  const Image(
+              errorBuilder: (context, error, stackTrace) => const Image(
                 image: AssetImage('assets/images/icon_bus.png'),
                 width: 20,
                 height: 20,
@@ -87,13 +88,14 @@ class Feature {
       ),
     );
   }
-  /// Retorna a cor baseada no sentido do veículo
+
+  /// Retorna a cor baseada no sentido do veículo (em volta do icone)
   Color getColorBySentido() {
     switch (properties.sentido?.toUpperCase()) {
       case 'IDA':
         return Colors.blueAccent;
       case 'VOLTA':
-        return Colors.orangeAccent;
+        return Colors.orange;
       case 'CIRCULAR':
         return Colors.redAccent;
       default:
@@ -101,9 +103,6 @@ class Feature {
     }
   }
 }
-
-
-
 
 class Geometry {
   final List<double> coordinates;

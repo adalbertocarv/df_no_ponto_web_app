@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../providers/favoritos.dart';
+import '../../../providers/favoritos_linha.dart';
 
 class FavoriteButtonWidget extends StatelessWidget {
   final String numero;

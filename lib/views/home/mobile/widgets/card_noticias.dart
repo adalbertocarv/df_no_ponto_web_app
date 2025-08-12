@@ -1,10 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../services/noticias/noticia_imagem.dart';
 import '../../../../services/noticias/noticias.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
 
 class NoticiasCarousel extends StatefulWidget {
   const NoticiasCarousel({super.key});
@@ -25,17 +24,6 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
     _futureNoticias = _noticiasService.procurarNoticias();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //
-  //   // Simula carregamento de 3 segundos antes de buscar os dados
-  //   _futureNoticias = Future.delayed(
-  //     const Duration(seconds: 3),
-  //         () => _noticiasService.procurarNoticias(),
-  //   ).then((futuro) => futuro); // mantém o mesmo tipo de retorno
-  // }
-
   Future<void> _abrirLink(String url) async {
     if (url.isNotEmpty) {
       final uri = Uri.parse(url);
@@ -55,20 +43,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
       future: _futureNoticias,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          final skeletonController = PageController(viewportFraction: 1.0);
-          return SizedBox(
-            height: 200,
-            child: PageView.builder(
-              controller: skeletonController, // controller independente
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: _buildSkeletonCardMobile(),
-                );
-              },
-            ),
-          );
+          return _buildSkeletonCarousel();
         }
         if (snapshot.hasError) {
           return const Center(child: Text('Erro ao carregar notícias'));
@@ -82,132 +57,18 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 200,
-              child:
-              PageView.builder(
+              height: 100,
+              child: PageView.builder(
                 controller: _pageController,
                 itemCount: noticias.length,
                 itemBuilder: (context, index) {
-                  return AnimatedBuilder(
-                    animation: _pageController,
-                    builder: (context, child) {
-                      double scale = 1.0;
-
-                      if (_pageController.position.haveDimensions) {
-                        scale = (_pageController.page! - index).abs();
-                        scale = (1 - (scale * 0.05)).clamp(0.95, 1.0);
-                      }
-
-                      return Transform.scale(
-                        scale: scale,
-                        child: child,
-                      );
-                    },
-                    child: Builder(
-                      builder: (context) {
-                        final noticia = noticias[index];
-                        return FutureBuilder<Uint8List?>(
-                          future: _imagemService.carregarImagemProtegida(noticia['img']),
-                          builder: (context, imgSnapshot) {
-                            Widget imagemWidget;
-                            if (imgSnapshot.connectionState == ConnectionState.waiting) {
-                              imagemWidget = Container(
-                                height: 100,
-                                width: double.infinity,
-                                color: Colors.grey[200],
-                                child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              );
-                            } else if (imgSnapshot.hasData && imgSnapshot.data != null) {
-                              imagemWidget = ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  topRight: Radius.circular(12),
-                                ),
-                                child: Image.memory(
-                                  imgSnapshot.data!,
-                                  height: 100,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            } else {
-                              imagemWidget = Container(
-                                height: 100,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.blue[300],
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    topRight: Radius.circular(12),
-                                  ),
-                                ),
-                                child:                   const Image(
-                                  image: AssetImage('assets/images/icon_bus.png'),
-                                  width: 40,
-                                  height: 40,
-                                ),
-                              );
-                            }
-
-                            return GestureDetector(
-                              onTap: () => _abrirLink(noticia['link']),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.1),
-                                      spreadRadius: 1,
-                                      blurRadius: 3,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    imagemWidget,
-                                    Padding(
-                                      padding: const EdgeInsets.all(12),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            noticia['titulo'] ?? '',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            noticia['descricao'] ?? '',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
-                                              height: 1.3,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4), // mantém um pequeno gap
+                    child: _buildNoticiaCard(noticias[index]),
                   );
                 },
-              )
+              ),
+
             ),
             const SizedBox(height: 8),
             SmoothPageIndicator(
@@ -226,61 +87,114 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
     );
   }
 
-  Widget _buildSkeletonCardMobile() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Área da imagem
-          Container(
+  Widget _buildNoticiaCard(Map<String, dynamic> noticia) {
+    return FutureBuilder<Uint8List?>(
+      future: _imagemService.carregarImagemProtegida(noticia['img']),
+      builder: (context, imgSnapshot) {
+        Widget imageWidget;
+        if (imgSnapshot.connectionState == ConnectionState.waiting) {
+          imageWidget = Container(
             height: 100,
             width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Color(0xFFE0E0E0), // cinza claro
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            color: Colors.grey[200],
+            child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          );
+        } else if (imgSnapshot.hasData && imgSnapshot.data != null) {
+          imageWidget = Image.memory(
+            imgSnapshot.data!,
+            height: 100,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          );
+        } else {
+          imageWidget = Container(
+            height: 100,
+            width: double.infinity,
+            color: Colors.blue[300],
+            child: const Icon(Icons.image_not_supported, color: Colors.white, size: 40),
+          );
+        }
+
+        return GestureDetector(
+          onTap: () => _abrirLink(noticia['link']),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Container(
-                  height: 14,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+                imageWidget,
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.transparent, Colors.black.withOpacity(0.6)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                Container(
-                  height: 12,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(4),
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        noticia['titulo'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black45,
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        noticia['descricao'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSkeletonCarousel() {
+    return SizedBox(
+      height: 100,
+      child: PageView.builder(
+        controller: PageController(viewportFraction: 1.0),
+        itemCount: 3,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                color: Colors.grey[300],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

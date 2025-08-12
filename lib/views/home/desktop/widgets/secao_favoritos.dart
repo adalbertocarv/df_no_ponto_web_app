@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../providers/favoritos.dart';
+import '../../../../providers/favoritos_linha.dart';
 import '../../../resultado_linha/resultado_linha.dart';
 import 'item_favoritos.dart';
 

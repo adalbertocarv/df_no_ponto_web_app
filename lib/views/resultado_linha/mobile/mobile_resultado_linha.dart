@@ -263,7 +263,7 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         // Markers dos veículos por cima
         if (vehicleMarkers.isNotEmpty)
           MarkerLayer(markers: vehicleMarkers),
-        CentralizarLocalizacao(mapController: _map,),
+        CentralizarLocalizacao(mapController: _map, top: 100,right: 16,),
         CentralizarPolylines(mapaController: _mapaController),
         const SimpleAttributionWidget(
           source: Text('OpenStreetMap contributors'),
@@ -864,6 +864,8 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
   }
   void _showVehicleDetails(BuildContext context, Feature veiculo) {
     final props = veiculo.properties;
+    final datalocal = props.datalocal ?? 'N/A';
+    final dataFormatada = formatarDataHora(datalocal);
 
     showDialog(
       context: context,
@@ -880,14 +882,12 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
               Text('Código da Linha: ${props.cdLinha}'),
             if (props.velocidade != null)
               Text('Velocidade: ${props.velocidade} km/h'),
-            if (props.direcao != null)
-              Text('Direção: ${props.direcao}'),
+            // if (props.direcao != null)
+            //   Text('Direção: ${props.direcao}'),
             if (props.datalocal != null)
-              Text('Última atualização: ${props.datalocal}'),
+              Text('Última atualização: $dataFormatada'),
             const SizedBox(height: 8),
             Text('Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}'),
-            if (props.sentido != null)
-              Text('Sentido: ${props.sentido}'),
           ],
         ),
         actions: [
@@ -908,5 +908,20 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         ],
       ),
     );
+  }
+
+  /// Formata a data e hora para exibição amigável
+  String formatarDataHora(String datalocal) {
+    try {
+      final dateTime = DateTime.parse(datalocal);
+      return '${dateTime.day.toString().padLeft(2, '0')}/'
+          '${dateTime.month.toString().padLeft(2, '0')}/'
+          '${dateTime.year} às '
+          '${dateTime.hour.toString().padLeft(2, '0')}:'
+          '${dateTime.minute.toString().padLeft(2, '0')}:'
+          '${dateTime.second.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return 'Data inválida';
+    }
   }
 }

@@ -5,13 +5,21 @@ class CustomPopup extends StatelessWidget {
   final Map<String, dynamic> dadosVeiculo;
   final PopupController popupController;
   final String linha;
-  final VoidCallback onClose; // Callback para fechar o popup e limpar o percurso
+  final VoidCallback onClose;
+  final VoidCallback? onVerRota; // Callback para ver/ocultar rota
+  final bool carregandoPercurso; // Se está carregando percurso
+  final bool temRota; // Se já tem a rota carregada
+  final bool isLinhaAtual; // Se é a linha atual sendo carregada
 
   const CustomPopup({
     required this.dadosVeiculo,
     required this.popupController,
     required this.linha,
     required this.onClose,
+    this.onVerRota,
+    this.carregandoPercurso = false,
+    this.temRota = false,
+    this.isLinhaAtual = false,
     Key? key,
   }) : super(key: key);
 
@@ -25,82 +33,114 @@ class CustomPopup extends StatelessWidget {
     // Formatando a data e hora
     final dataFormatada = formatarDataHora(datalocal);
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 220,
-              padding: const EdgeInsets.all(12),
-              color: Colors.black.withOpacity(0.8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // Ajusta altura dinamicamente
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      linha != null && linha.isNotEmpty
-                          ? Expanded(
-                        child: Text(
-                          'Linha: $linha',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      )
-                          : const SizedBox.shrink(),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-
-                        onPressed: onClose,
-                        tooltip: 'Fechar',
-                      ),
-                    ],
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          linha != null && linha.isNotEmpty
+              ? Text(
+                  'Linha: $linha',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Operadora: $nmOperadora',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Prefixo: $prefixo',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Sentido: $sentido',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Última atualização:',
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                  Text(
-                    dataFormatada,
-                    style: const TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
+                  overflow: TextOverflow.ellipsis,
+                )
+              : const SizedBox.shrink(),
+          const SizedBox(height: 4),
+          Text(
+            'Prefixo: $prefixo',
+            style: TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 4),
+          Text('Operadora: $nmOperadora',            style: TextStyle(color: Colors.white),),
+          if (sentido != 'N/A') const SizedBox(height: 4),
+          if (sentido != 'N/A') Text('Sentido: $sentido',            style: TextStyle(color: Colors.white),),
+          const SizedBox(height: 4),
+          Text(
+            'Última atualização:',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
             ),
           ),
-        ),
-        Positioned(
-          bottom: 0,
-          child: CustomPaint(
-            size: const Size(20, 10),
-            painter: TrianglePainter(),
+          Text(
+            dataFormatada,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Botão Ver/Ocultar Rota
+              if (onVerRota != null)
+                TextButton(
+                  onPressed: carregandoPercurso ? null : onVerRota,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (carregandoPercurso && isLinhaAtual)
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      else
+                        linha != null && linha.isNotEmpty
+                            ? Icon(
+                                temRota ? Icons.visibility_off : Icons.route,
+                                size: 16,
+                                color: carregandoPercurso
+                                    ? Colors.blue
+                                    : Colors.blueAccent,
+                              )
+                            : const SizedBox.shrink(),
+                      const SizedBox(width: 4),
+                      linha != null && linha.isNotEmpty
+                          ? Text(
+                              temRota ? 'Ocultar Rota' : 'Ver Rota',
+                              style: TextStyle(
+                                color: carregandoPercurso
+                                    ? Colors.blue
+                                    : Colors.blueAccent,
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
+                ),
+              if (onVerRota != null) const SizedBox(width: 8),
+              // Botão Fechar
+              TextButton(
+                onPressed: onClose,
+                child: const Text(
+                  'Fechar',
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -116,27 +156,5 @@ class CustomPopup extends StatelessWidget {
     } catch (e) {
       return 'Data inválida';
     }
-  }
-}
-
-class TrianglePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black.withOpacity(0.8)
-      ..style = PaintingStyle.fill;
-
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..lineTo(size.width, 0)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
   }
 }

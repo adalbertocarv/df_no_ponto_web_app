@@ -33,7 +33,7 @@ class DesktopSidePanel extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(2, 0),
           ),
@@ -112,8 +112,8 @@ class DesktopSidePanel extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: sentidoAtual.toUpperCase() == 'IDA'
-                  ? Colors.blueAccent.withOpacity(0.1)
-                  : Colors.orangeAccent.withOpacity(0.1),
+                  ? Colors.blueAccent.withValues(alpha: 0.1)
+                  : Colors.orangeAccent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: sentidoAtual.toUpperCase() == 'IDA'
@@ -589,8 +589,8 @@ class DesktopSidePanel extends StatelessWidget {
             margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: dadosController.sentidoSelecionado.toUpperCase() == 'IDA'
-                  ? Colors.blueAccent.withOpacity(0.1)
-                  : Colors.orangeAccent.withOpacity(0.1),
+                  ? Colors.blueAccent.withValues(alpha: 0.1)
+                  : Colors.orangeAccent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: dadosController.sentidoSelecionado.toUpperCase() == 'IDA'
@@ -632,7 +632,7 @@ class DesktopSidePanel extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: sentidoColor.withOpacity(0.1),
+                      color: sentidoColor.withValues(alpha: 0.1),
                       border: Border.all(color: sentidoColor, width: 2),
                     ),
                     child: Icon(
@@ -718,42 +718,36 @@ class DesktopSidePanel extends StatelessWidget {
 
   void _showVehicleDetails(BuildContext context, Feature veiculo) {
     final props = veiculo.properties;
+    final datalocal = props.datalocal ?? 'N/A';
+    final dataFormatada = formatarDataHora(datalocal);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: Text(
-          'Veículo ${props.prefixo ?? 'N/A'}',
-          style: const TextStyle(fontSize: 16),
-        ),
+        title: Text('Veículo ${props.prefixo ?? 'N/A'}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (props.nm_operadora != null)
-              Text('Operadora: ${props.nm_operadora}', style: const TextStyle(fontSize: 12)),
+              Text('Operadora: ${props.nm_operadora}'),
             if (props.cdLinha != null)
-              Text('Código da Linha: ${props.cdLinha}', style: const TextStyle(fontSize: 12)),
+              Text('Código da Linha: ${props.cdLinha}'),
             if (props.velocidade != null)
-              Text('Velocidade: ${props.velocidade} km/h', style: const TextStyle(fontSize: 12)),
-            if (props.direcao != null)
-              Text('Direção: ${props.direcao}', style: const TextStyle(fontSize: 12)),
+              Text('Velocidade: ${props.velocidade} km/h'),
+            // if (props.direcao != null)
+            //   Text('Direção: ${props.direcao}'),
             if (props.datalocal != null)
-              Text('Última atualização: ${props.datalocal}', style: const TextStyle(fontSize: 12)),
+              Text('Última atualização: $dataFormatada'),
             const SizedBox(height: 8),
-            Text(
-              'Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}',
-              style: const TextStyle(fontSize: 11),
-            ),
-            if (props.sentido != null)
-              Text('Sentido: ${props.sentido}', style: const TextStyle(fontSize: 12)),
+            Text('Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}'),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar', style: TextStyle(color: Colors.blueAccent)),
+            child: const Text('Fechar', style: TextStyle(color: Colors.blueAccent),),
           ),
           TextButton(
             onPressed: () {
@@ -763,11 +757,26 @@ class DesktopSidePanel extends StatelessWidget {
                 mapController.move(LatLng(coords[1], coords[0]), 18);
               }
             },
-            child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent)),
+            child: const Text('Ver no Mapa', style: TextStyle(color: Colors.blueAccent),),
           ),
         ],
       ),
     );
+  }
+
+  /// Formata a data e hora para exibição amigável
+  String formatarDataHora(String datalocal) {
+    try {
+      final dateTime = DateTime.parse(datalocal);
+      return '${dateTime.day.toString().padLeft(2, '0')}/'
+          '${dateTime.month.toString().padLeft(2, '0')}/'
+          '${dateTime.year} às '
+          '${dateTime.hour.toString().padLeft(2, '0')}:'
+          '${dateTime.minute.toString().padLeft(2, '0')}:'
+          '${dateTime.second.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return 'Data inválida';
+    }
   }
 }
 
