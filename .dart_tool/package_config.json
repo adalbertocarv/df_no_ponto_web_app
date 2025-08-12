@@ -14,12 +14,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "args",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.7.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
       "name": "async",
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0",
       "packageUri": "lib/",
@@ -66,12 +60,6 @@
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/dart_earcut-1.2.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
-    },
-    {
-      "name": "dbus",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/dbus-0.7.11",
-      "packageUri": "lib/",
-      "languageVersion": "2.17"
     },
     {
       "name": "dio",
@@ -158,32 +146,20 @@
       "languageVersion": "3.7"
     },
     {
-      "name": "geoclue",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geoclue-0.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.16"
-    },
-    {
       "name": "geolocator",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator-14.0.2",
+      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator-12.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "2.15"
     },
     {
       "name": "geolocator_android",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_android-5.0.2",
+      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_android-4.6.2",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
     {
       "name": "geolocator_apple",
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_apple-2.3.13",
-      "packageUri": "lib/",
-      "languageVersion": "3.5"
-    },
-    {
-      "name": "geolocator_linux",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_linux-0.2.3",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -204,12 +180,6 @@
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/geolocator_windows-0.2.5",
       "packageUri": "lib/",
       "languageVersion": "3.5"
-    },
-    {
-      "name": "gsettings",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/gsettings-0.2.8",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "http",
@@ -308,18 +278,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "package_info_plus",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus-8.3.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
-      "name": "package_info_plus_platform_interface",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
       "name": "path",
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
@@ -378,12 +336,6 @@
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/permission_handler_windows-0.2.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
-    },
-    {
-      "name": "petitparser",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/petitparser-6.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.5"
     },
     {
       "name": "platform",
@@ -596,12 +548,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "win32",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/win32-5.14.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.8"
-    },
-    {
       "name": "wkt_parser",
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/wkt_parser-2.0.0",
       "packageUri": "lib/",
@@ -612,12 +558,6 @@
       "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/xdg_directories-1.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.3"
-    },
-    {
-      "name": "xml",
-      "rootUri": "file:///C:/Users/01002846055/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.5.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.2"
     },
     {
       "name": "df_no_ponto_web_app",
