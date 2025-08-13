@@ -235,10 +235,17 @@ class _MobileHomeState extends State<MobileHome> {
 
                     Opacity(
                       opacity: 0.3, // Opacidade baixa
-                      child: Image.asset(
-                        'assets/images/BusStop.png',
-                        width: 280,
-                        fit: BoxFit.contain,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          double screenWidth = MediaQuery.of(context).size.width;
+                          double imageWidth = screenWidth * 0.3; // 30% da largura da tela
+
+                          return Image.asset(
+                            'assets/images/BusStop.png',
+                            width: imageWidth,
+                            fit: BoxFit.contain,
+                          );
+                        },
                       ),
                     ),
                   ]
