@@ -153,6 +153,7 @@ class _MobileHomeState extends State<MobileHome> {
   /* ------------ UI ------------ */
   @override
   Widget build(BuildContext context) {
+
     return SafeArea(
       child: Scaffold(
         drawer: const AppDrawer(),

@@ -55,7 +55,7 @@ class SugestoesLinha {
     }
 
     try {
-      final url = Uri.parse('${caminhoBackend.baseUrl}/numeros/find/$queryLimpa/$limite');
+      final url = Uri.parse('${CaminhoBackend.baseUrl}/numeros/find/$queryLimpa/$limite');
 
       // Faz a requisição com timeout
       final response = await http
@@ -156,7 +156,6 @@ class SugestoesLinha {
           resultado.add(LinhaPesquisa.fromJson(item));
         } catch (e) {
           // Log do erro mas continua processando outros itens
-          print('Erro ao converter item: $e');
           continue;
         }
       }

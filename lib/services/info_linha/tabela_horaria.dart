@@ -7,7 +7,7 @@ import '../constants/url.dart';
 
 class HorarioService {
   Future<List<HorarioModel>> procurarHorarios(String numero) async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/horario/$numero");
+    final url = Uri.parse("${CaminhoBackend.baseUrl}/horario/$numero");
 
     final response = await http.get(url, headers: ApiHeaders.json);
 

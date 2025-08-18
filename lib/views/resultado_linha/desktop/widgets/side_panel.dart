@@ -651,9 +651,9 @@ class DesktopSidePanel extends StatelessWidget {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (props.nm_operadora != null)
+                      if (props.nmOperadora != null)
                         Text(
-                          'Operadora: ${props.nm_operadora?.split(' ')}',
+                          'Operadora: ${props.nmOperadora?.split(' ')}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 10),
@@ -730,8 +730,8 @@ class DesktopSidePanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (props.nm_operadora != null)
-              Text('Operadora: ${props.nm_operadora}'),
+            if (props.nmOperadora != null)
+              Text('Operadora: ${props.nmOperadora}'),
             if (props.cdLinha != null)
               Text('Código da Linha: ${props.cdLinha}'),
             if (props.velocidade != null)

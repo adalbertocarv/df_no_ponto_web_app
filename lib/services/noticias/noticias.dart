@@ -7,7 +7,7 @@ import '../../services/constants/url.dart';
 class NoticiasSemob {
   Future<List<Map<String, dynamic>>> procurarNoticias() async {
     try {
-      final url = Uri.parse("${caminhoBackend.baseUrl}/noticias");
+      final url = Uri.parse("${CaminhoBackend.baseUrl}/noticias");
       final response = await http.get(url, headers: ApiHeaders.json);
 
       if (response.statusCode == 200) {

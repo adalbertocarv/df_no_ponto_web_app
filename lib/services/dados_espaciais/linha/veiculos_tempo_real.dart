@@ -6,7 +6,7 @@ import '../../constants/url.dart';
 
 class VeiculosService {
   Future<VeiculosTempoReal> buscarUltimaPosicao(String numero) async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/recente/$numero");
+    final url = Uri.parse("${CaminhoBackend.baseUrl}/recente/$numero");
 
     final response = await http.get(url, headers: ApiHeaders.json);
 

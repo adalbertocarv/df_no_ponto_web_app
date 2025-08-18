@@ -8,7 +8,7 @@ import '../../constants/url.dart';
 class UrbiVeiculosService {
 
   Future<VeiculosOperadoras> buscarPosicaoUrbi() async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/posicao/urbi");
+    final url = Uri.parse("${CaminhoBackend.baseUrl}/posicao/urbi");
 
     try {
       final response = await http.get(url, headers: ApiHeaders.json);

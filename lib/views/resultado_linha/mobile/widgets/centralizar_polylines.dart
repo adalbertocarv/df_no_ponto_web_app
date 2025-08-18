@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../controller/resultado_linha/mapa_linha_controller.dart';
-import '../../../theme/theme_provider.dart';
+import '../../../../providers/theme/theme_provider.dart';
 
 class CentralizarPolylines extends StatelessWidget {
   final ResultadoMapaController mapaController;

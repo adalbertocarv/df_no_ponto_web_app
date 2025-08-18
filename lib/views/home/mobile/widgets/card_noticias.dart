@@ -127,7 +127,7 @@ class _NoticiasCarouselState extends State<NoticiasCarousel> {
                   child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.transparent, Colors.black.withOpacity(0.6)],
+                        colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),

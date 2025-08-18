@@ -1,11 +1,10 @@
 import 'package:df_no_ponto_web_app/views/veiculos/desktop/desktop_veiculos.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../veiculos/veiculos.dart';
 import 'nav_item.dart';
 
 Widget buildDesktopHeader(BuildContext context) {
-  Future<void> _abrirLink(String url) async {
+  Future<void> abrirLink(String url) async {
     final uri = Uri.parse(url);
 
     // Para web, abrir em nova guia (_blank)
@@ -65,7 +64,7 @@ Widget buildDesktopHeader(BuildContext context) {
 
               const SizedBox(width: 20),
               InkWell(
-                onTap: () => _abrirLink('https://www.df.gov.br/'),
+                onTap: () => abrirLink('https://www.df.gov.br/'),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

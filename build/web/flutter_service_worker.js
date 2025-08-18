@@ -3,17 +3,16 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"assets/AssetManifest.bin": "ece917bebe0fec963d254e72bba9461b",
-"assets/AssetManifest.bin.json": "dd44eeca414ff9facc19d64d1b484160",
-"assets/AssetManifest.json": "a40fbfe7a076f185efbdda46e2a210d0",
+const RESOURCES = {"assets/AssetManifest.bin": "098bc9bc701e8b3ce7dadc58b16613f3",
+"assets/AssetManifest.bin.json": "24ad7dd5f21a9d3eeaeb1d07800a26cb",
+"assets/AssetManifest.json": "255159805ad705c9750b215d81f5b1ad",
 "assets/assets/images/brasilia.png": "686df260c19fc55fe1811f631637f095",
-"assets/assets/images/bus.png": "0d5507b9bd1bbb2da0ccf8214ceb51f2",
 "assets/assets/images/BusStop.png": "4fe55d1e5f7757a1f78100ed990a4814",
 "assets/assets/images/defaultBus.png": "f99b24e3342da49814351a0e3dedc29f",
 "assets/assets/images/gdf-logo.png": "2826ffa225e34eba10c0189294b108f5",
 "assets/assets/images/icon_bus.png": "01e9631636dba7c924c41786de1bced5",
 "assets/assets/images/icon_bus_azul.png": "597409b55c8c7cc8e030914c4f9f04c0",
-"assets/assets/images/logo.png": "fd0e8d79d444bc1a896f83b71c691ded",
+"assets/assets/images/logo.png": "ffa95ba406e4f25242cdb8449a118ab2",
 "assets/assets/images/marechalBus.png": "98eaf742eefd117344bdd26ccf795106",
 "assets/assets/images/ouvidoria.webp": "ff13fadeb473f2efe6a58db189c57f89",
 "assets/assets/images/pioneiraBus.png": "4eaaa625db5262d07baa326d013bf694",
@@ -38,15 +37,15 @@ const RESOURCES = {"assets/AssetManifest.bin": "ece917bebe0fec963d254e72bba9461b
 "canvaskit/skwasm.wasm": "39dd80367a4e71582d234948adc521c0",
 "favicon.png": "82e8f7e03cd63a3adc15d4ef197b839f",
 "flutter.js": "83d881c1dbb6d6bcd6b42e274605b69c",
-"flutter_bootstrap.js": "970ddee0657fafe9eb348b1141fc902a",
+"flutter_bootstrap.js": "f8757f097b5ab507b66fec66cad8a28c",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
-"index.html": "aa0ba67febf0d70ba465cd82bd2bad2d",
-"/": "aa0ba67febf0d70ba465cd82bd2bad2d",
-"main.dart.js": "4b287b87dab586250fd661cc6455d434",
-"manifest.json": "02d63fab6bbfbe303b7e57e0fe9b2c49",
+"index.html": "2180bac87fc98d5f9b9714b01893e7b7",
+"/": "2180bac87fc98d5f9b9714b01893e7b7",
+"main.dart.js": "a92590a6f37dcb420e9353581afb563f",
+"manifest.json": "6113e711f883ded61180e16c8f7e9c0b",
 "version.json": "96656584df42ce7af7edbe2b9daf30d5"};
 // The application shell files that are downloaded before a service worker can
 // start.

@@ -113,15 +113,18 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
         ],
       ),
       body: _dadosController.carregando
-          ? _loader()
+          ? Container(
+        color: Colors.white, // fundo branco durante o carregamento
+        child: _loader(),
+      )
           : _dadosController.erro != null
-              ? Center(child: Text(_dadosController.erro!))
-              : Stack(
-                  children: [
-                    _buildMap(),
-                    _buildDraggableSheet(),
-                  ],
-                ),
+          ? Center(child: Text(_dadosController.erro!))
+          : Stack(
+        children: [
+          _buildMap(),
+          _buildDraggableSheet(),
+        ],
+      ),
     );
   }
 
@@ -181,9 +184,9 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                         'Sentido: ${props.sentido}',
                         style: const TextStyle(fontSize: 12),
                       ),
-                    if (props.nm_operadora != null)
+                    if (props.nmOperadora != null)
                       Text(
-                        'Operadora: ${props.nm_operadora}',
+                        'Operadora: ${props.nmOperadora}',
                         style: const TextStyle(fontSize: 10),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -304,7 +307,24 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
     );
   }
   // --------------------------- DRAGGABLE SHEET ---------------------------
-// Substitua o método _buildDraggableSheet() no seu arquivo mobile_resultado_linha.dart
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    // Use os valores definidos no seu DraggableScrollableSheet
+    final minSize = 0.15;
+    final maxSize = 0.85;
+
+    final currentSize = _draggableController.size;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Evita divisão por zero se o widget for construído antes do layout
+    if (screenHeight == 0) return;
+
+    // Calcula o novo tamanho baseado no delta do arrasto
+    final newSize = currentSize - (details.primaryDelta! / screenHeight);
+
+    // Aplica o novo tamanho, garantindo que ele fique entre min e max
+    _draggableController.jumpTo(newSize.clamp(minSize, maxSize));
+  }
 
   Widget _buildDraggableSheet() {
     return DraggableScrollableSheet(
@@ -330,13 +350,8 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
             // Header com GestureDetector aplicado
             GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onVerticalDragUpdate: (details) {
-                final currentSize = _draggableController.size;
-                final screenHeight = MediaQuery.of(context).size.height;
-                if (screenHeight == 0) return;
-                final newSize = currentSize - (details.primaryDelta! / screenHeight);
-                _draggableController.jumpTo(newSize.clamp(0.2, 0.65));
-              },
+              // Chama a nova função
+              onVerticalDragUpdate: _handleDragUpdate,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -408,43 +423,48 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                 length: 4,
                 child: Column(
                   children: [
-                    TabBar(
-                      isScrollable: false,
-                      tabAlignment: TabAlignment.fill,
-                      labelColor: Colors.blueAccent,
-                      unselectedLabelColor: Colors.grey[600],
-                      indicatorColor: Colors.blueAccent,
-                      labelStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                    GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      // Chama a mesma função
+                      onVerticalDragUpdate: _handleDragUpdate,
+                      child: TabBar(
+                        isScrollable: false,
+                        tabAlignment: TabAlignment.fill,
+                        labelColor: Colors.blueAccent,
+                        unselectedLabelColor: Colors.grey[600],
+                        indicatorColor: Colors.blueAccent,
+                        labelStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        unselectedLabelStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.normal,
+                        ),
+                        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                        tabs: const [
+                          Tab(
+                            icon: Icon(Icons.schedule, size: 20),
+                            text: 'Horários',
+                            iconMargin: EdgeInsets.only(bottom: 4),
+                          ),
+                          Tab(
+                            icon: Icon(Icons.route, size: 20),
+                            text: 'Itinerário',
+                            iconMargin: EdgeInsets.only(bottom: 4),
+                          ),
+                          Tab(
+                            icon: Icon(Icons.info, size: 20),
+                            text: 'Informações',
+                            iconMargin: EdgeInsets.only(bottom: 4),
+                          ),
+                          Tab(
+                            icon: Icon(Icons.directions_bus, size: 20),
+                            text: 'Veículos',
+                            iconMargin: EdgeInsets.only(bottom: 4),
+                          ),
+                        ],
                       ),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.normal,
-                      ),
-                      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                      tabs: const [
-                        Tab(
-                          icon: Icon(Icons.schedule, size: 20),
-                          text: 'Horários',
-                          iconMargin: EdgeInsets.only(bottom: 4),
-                        ),
-                        Tab(
-                          icon: Icon(Icons.route, size: 20),
-                          text: 'Itinerário',
-                          iconMargin: EdgeInsets.only(bottom: 4),
-                        ),
-                        Tab(
-                          icon: Icon(Icons.info, size: 20),
-                          text: 'Informações',
-                          iconMargin: EdgeInsets.only(bottom: 4),
-                        ),
-                        Tab(
-                          icon: Icon(Icons.directions_bus, size: 20),
-                          text: 'Veículos',
-                          iconMargin: EdgeInsets.only(bottom: 4),
-                        ),
-                      ],
                     ),
                     Expanded(
                       child: TabBarView(
@@ -848,9 +868,9 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (props.nm_operadora != null)
+                      if (props.nmOperadora != null)
                         Text(
-                          'Operadora: ${props.nm_operadora}',
+                          'Operadora: ${props.nmOperadora}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -908,8 +928,8 @@ class _MobileResultadoLinhaState extends State<MobileResultadoLinha> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (props.nm_operadora != null)
-              Text('Operadora: ${props.nm_operadora}'),
+            if (props.nmOperadora != null)
+              Text('Operadora: ${props.nmOperadora}'),
             if (props.cdLinha != null)
               Text('Código da Linha: ${props.cdLinha}'),
             if (props.velocidade != null)

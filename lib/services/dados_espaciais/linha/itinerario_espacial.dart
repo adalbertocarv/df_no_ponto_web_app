@@ -7,7 +7,7 @@ import '../../constants/url.dart';
 class PercursoService {
 
   Future<Map<String, List<PercursoModel>>> buscarPercursos(String numero) async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/espaciais/$numero");
+    final url = Uri.parse("${CaminhoBackend.baseUrl}/espaciais/$numero");
 
     try {
       final response = await http.get(url, headers: ApiHeaders.json);

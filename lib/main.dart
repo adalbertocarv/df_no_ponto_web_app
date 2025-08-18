@@ -1,6 +1,6 @@
 import 'package:df_no_ponto_web_app/providers/favoritos_linha.dart';
+import 'package:df_no_ponto_web_app/providers/theme/theme_provider.dart';
 import 'package:df_no_ponto_web_app/views/home/home_page.dart';
-import 'package:df_no_ponto_web_app/views/theme/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,23 +21,12 @@ class DfNoPontoWebApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: 'DF no Ponto - SEMOB',
+      title: 'InfoÔnibus - SEMOB',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textSelectionTheme: const TextSelectionThemeData(
-          cursorColor: Colors.blueAccent,          // cor do cursor
-          selectionColor: Colors.blueAccent,       // cor da seleção de texto
-          selectionHandleColor: Colors.blueAccent, // cor do marcador de seleção
-        ),
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        progressIndicatorTheme: const ProgressIndicatorThemeData(
-          color: Colors.blueAccent,
-        ),
-      ),
+      theme: themeProvider.currentTheme,
       home: const ResponsiveHome(),
     );
   }

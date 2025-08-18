@@ -931,6 +931,7 @@ file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/models/lin
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/models/pesquisa_linha/pesquisa_linha_model.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/models/veiculos/veiculos_posicao_model.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/providers/favoritos_linha.dart
+file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/providers/theme/theme_provider.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/services/constants/api_headers.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/services/constants/url.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/services/dados_espaciais/linha/itinerario_espacial.dart
@@ -973,7 +974,6 @@ file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/resu
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/resultado_linha/resultado_linha.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/resultado_linha/widgets/build_titulo.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/resultado_linha/widgets/favorite_button.dart
-file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/theme/theme_provider.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/veiculos/desktop/desktop_veiculos.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/veiculos/mobile/mobile_veiculos.dart
 file:///C:/Users/01002846055/Documents/GitHub/df_no_ponto_web_app/lib/views/veiculos/veiculos.dart

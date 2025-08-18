@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'desktop/desktop_home.dart';
 
 class ResponsiveHome extends StatelessWidget {
-  const ResponsiveHome({Key? key}) : super(key: key);
+  const ResponsiveHome({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DF no Ponto - SEMOB',
+      title: 'InfoÔnibus - SEMOB',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Roboto',
@@ -21,7 +21,7 @@ class ResponsiveHome extends StatelessWidget {
 }
 
 class ResponsiveFavoritesScreen extends StatelessWidget {
-  const ResponsiveFavoritesScreen({Key? key}) : super(key: key);
+  const ResponsiveFavoritesScreen({super.key});
 
   // Breakpoints para diferentes tamanhos de tela
   static const double mobileBreakpoint = 780.0;

@@ -21,7 +21,7 @@ Widget buildFavoritesSection(bool isDesktop, bool isTablet, BuildContext context
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.08),
+              color: Colors.grey.withValues(alpha: 0.08),
               spreadRadius: 2,
               blurRadius: 20,
               offset: const Offset(0, 4),

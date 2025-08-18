@@ -8,7 +8,7 @@ class PercursoCompletoService {
 
   /// Consulta a API para obter as linhas e retorna uma linha unificada
   Future<PercursoCompleto> buscarPercursoCompleto(String linha) async {
-    final url = Uri.parse('${caminhoBackend.baseUrl}/espaciais/$linha');
+    final url = Uri.parse('${CaminhoBackend.baseUrl}/espaciais/$linha');
 
     try {
       final response = await http.get(url, headers: ApiHeaders.json);

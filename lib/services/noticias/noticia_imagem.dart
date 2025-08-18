@@ -15,7 +15,6 @@ class ImagemService {
     if (response.statusCode == 200) {
       return response.bodyBytes;
     } else {
-      print('Erro ao carregar imagem: ${response.statusCode}');
       return null;
     }
   }

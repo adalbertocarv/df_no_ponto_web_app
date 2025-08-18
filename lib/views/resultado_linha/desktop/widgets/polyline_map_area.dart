@@ -9,7 +9,7 @@ import '../../../../models/linha/veiculos_tempo_real.dart';
 import '../../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
 
 class DesktopMapArea extends StatefulWidget {
-    DesktopMapArea({
+    const DesktopMapArea({
     super.key,
     required this.dadosController,
     required this.mapController,
@@ -173,8 +173,8 @@ class _DesktopMapAreaState extends State<DesktopMapArea> {
            mainAxisSize: MainAxisSize.min,
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             if (props.nm_operadora != null)
-               Text('Operadora: ${props.nm_operadora}'),
+             if (props.nmOperadora != null)
+               Text('Operadora: ${props.nmOperadora}'),
              if (props.cdLinha != null)
                Text('Código da Linha: ${props.cdLinha}'),
              if (props.velocidade != null)
@@ -182,7 +182,7 @@ class _DesktopMapAreaState extends State<DesktopMapArea> {
              // if (props.direcao != null)
              //   Text('Direção: ${props.direcao}'),
              if (props.datalocal != null)
-               Text('Última atualização: ${dataFormatada}'),
+               Text('Última atualização: $dataFormatada'),
              const SizedBox(height: 8),
              Text('Coordenadas: ${veiculo.geometry.coordinates[1].toStringAsFixed(6)}, ${veiculo.geometry.coordinates[0].toStringAsFixed(6)}'),
            ],

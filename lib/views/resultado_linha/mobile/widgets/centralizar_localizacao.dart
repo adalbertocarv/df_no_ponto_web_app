@@ -4,8 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../providers/theme/theme_provider.dart';
 import '../../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
-import '../../../theme/theme_provider.dart';
 
 class CentralizarLocalizacao extends StatelessWidget {
   final MapController mapController;

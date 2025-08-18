@@ -117,8 +117,6 @@ class Horario {
     // Padrões especiais conhecidos
       case 'SNNNNNS':
         return 'SEGUNDA-DOMINGO';
-      case 'SNNNNNN':
-        return 'SEGUNDA';
       case 'SSNNNNS':
         return 'SEGUNDA-TERÇA-DOMINGO';
 

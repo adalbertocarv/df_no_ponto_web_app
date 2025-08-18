@@ -4,8 +4,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart'; // NECESSÁRIO para openAppSettings
 
 // Importe seu serviço de localização que retorna o status detalhado
+import '../../../../providers/theme/theme_provider.dart';
 import '../../../../services/dados_espaciais/localizacao/localizacao_usuario.dart';
-import '../../../theme/theme_provider.dart';
 
 class CentralizarLocalizacao extends StatelessWidget {
   final MapController mapController;

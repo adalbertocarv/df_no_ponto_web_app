@@ -34,42 +34,46 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
   LatLng? _userLocation;
 
   // Variáveis para controle de linhas e percursos
-  Map<String, List<LatLng>> _percursosCarregados = {};
-  Set<String> _linhasSelecionadas = {};
+  final Map<String, List<LatLng>> _percursosCarregados = {};
+  final Set<String> _linhasSelecionadas = {};
   bool _carregandoPercurso = false;
   String? _linhaAtual;
   Timer? _timer;
 
-  // Variáveis para filtro
+  // Variáveis para filtro múltiplo
   String _searchText = '';
   bool _showFilteredLines = false;
   Set<String> _linhasFiltradas = {};
+  List<String> _numerosFiltrados = []; // Lista de números para filtrar
+  static const int _maxFiltros = 5; // Máximo de 5 números
 
   // Variáveis para paginação
   int _paginaAtual = 0;
-  static const int _itensPorPagina = 5;
+  // static const int _itensPorPagina = 5;
 
   // Configurações do cluster
   static const double _clusterRadius = 120;
   static const Size _clusterSize = Size(40, 40);
   static const EdgeInsets _clusterPadding = EdgeInsets.all(50);
-  static const LatLng BRASILIA_CENTER = LatLng(-15.793823, -47.882688);
+  static const LatLng brasiliaCenter = LatLng(-15.793823, -47.882688);
 
   // Getter para markers filtrados
   List<Marker> get _filteredMarkers {
-    if (_searchText.isEmpty) {
+    if (_numerosFiltrados.isEmpty) {
       return _markers;
     }
 
     return _markers.where((marker) {
       final feature = (marker.key as ValueKey).value;
-      final numeroLinha = feature.properties.veiculo.numero.toString().toLowerCase();
-      return numeroLinha.contains(_searchText.toLowerCase());
+      final numeroLinha = feature.properties.veiculo.numero.toString();
+
+      // Verifica se o número da linha está na lista de filtros
+      return _numerosFiltrados.any((filtro) =>
+          numeroLinha.toLowerCase().contains(filtro.toLowerCase()));
     }).toList();
   }
 
   // Instância do service de percurso
-  final PercursoCompletoService _percursoService = PercursoCompletoService();
 
   Future<void> _obterLocalizacaoInicial() async {
     final resultado = await LocalizacaoUsuarioService().obterLocalizacaoUsuario();
@@ -96,6 +100,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
     _searchController.addListener(() {
       setState(() {
         _searchText = _searchController.text;
+        _parseNumerosFiltrados();
         _updateLinhasFiltradas();
       });
     });
@@ -109,8 +114,26 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
     super.dispose();
   }
 
-  void _updateLinhasFiltradas() {
+  // Método para processar os números inseridos no campo de busca
+  void _parseNumerosFiltrados() {
     if (_searchText.isEmpty) {
+      _numerosFiltrados.clear();
+      return;
+    }
+
+    // Separa por vírgula e limpa espaços em branco
+    final numeros = _searchText
+        .split(' ')
+        .map((numero) => numero.trim())
+        .where((numero) => numero.isNotEmpty)
+        .take(_maxFiltros) // Limita a 5 números
+        .toList();
+
+    _numerosFiltrados = numeros;
+  }
+
+  void _updateLinhasFiltradas() {
+    if (_numerosFiltrados.isEmpty) {
       _linhasFiltradas.clear();
       _paginaAtual = 0;
       return;
@@ -120,7 +143,10 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
     for (var marker in _markers) {
       final feature = (marker.key as ValueKey).value;
       final numeroLinha = feature.properties.veiculo.numero.toString();
-      if (numeroLinha.toLowerCase().contains(_searchText.toLowerCase())) {
+
+      // Verifica se o número da linha corresponde a algum dos filtros
+      if (_numerosFiltrados.any((filtro) =>
+          numeroLinha.toLowerCase().contains(filtro.toLowerCase()))) {
         linhasEncontradas.add(numeroLinha);
       }
     }
@@ -147,8 +173,8 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
       final allMarkers = <Marker>[];
 
       for (var veiculosOperadora in results) {
-        if (veiculosOperadora?.features != null) {
-          for (var feature in veiculosOperadora!.features) {
+        if (veiculosOperadora.features != null) {
+          for (var feature in veiculosOperadora.features) {
             final coords = feature.geometry.coordinates;
 
             // Validação de coordenadas
@@ -174,7 +200,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
                         return const Image(
-                          image: AssetImage('assets/images/icon_bus.png'),
+                          image: AssetImage('assets/images/defaultBus.png'),
                           width: 20,
                           height: 20,
                         );
@@ -263,9 +289,18 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
     }
   }
 
-  // Método para carregar todas as rotas das linhas filtradas da página atual
-  Future<void> _carregarTodasRotasFiltradas() async {
-    for (String linha in _linhasPaginadas) {
+  // // Método para carregar todas as rotas das linhas filtradas da página atual
+  // Future<void> _carregarTodasRotasFiltradas() async {
+  //   for (String linha in _linhasPaginadas) {
+  //     if (!_percursosCarregados.containsKey(linha)) {
+  //       await _carregarPercurso(linha);
+  //     }
+  //   }
+  // }
+
+  // Método para carregar todas as rotas dos números filtrados
+  Future<void> _carregarTodasRotasNumerosFiltrados() async {
+    for (String linha in _linhasFiltradas) {
       if (!_percursosCarregados.containsKey(linha)) {
         await _carregarPercurso(linha);
       }
@@ -298,24 +333,33 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
     _searchFocusNode.unfocus();
     setState(() {
       _searchText = '';
+      _numerosFiltrados.clear();
       _linhasFiltradas.clear();
       _showFilteredLines = false;
       _paginaAtual = 0;
     });
   }
 
-  // Getters para paginação
-  List<String> get _linhasPaginadas {
-    final linhasList = _linhasFiltradas.toList();
-    final startIndex = _paginaAtual * _itensPorPagina;
-    final endIndex = (startIndex + _itensPorPagina).clamp(0, linhasList.length);
-    return linhasList.sublist(startIndex, endIndex);
+  // // Getters para paginação
+  // List<String> get _linhasPaginadas {
+  //   final linhasList = _linhasFiltradas.toList();
+  //   final startIndex = _paginaAtual * _itensPorPagina;
+  //   final endIndex = (startIndex + _itensPorPagina).clamp(0, linhasList.length);
+  //   return linhasList.sublist(startIndex, endIndex);
+  // }
+
+  // int get _totalPaginas => (_linhasFiltradas.length / _itensPorPagina).ceil();
+
+  // bool get _temPaginaAnterior => _paginaAtual > 0;
+  // bool get _temProximaPagina => _paginaAtual < _totalPaginas - 1;
+
+  // Método para obter texto de placeholder dinâmico
+  String get _placeholderText {
+    if (_numerosFiltrados.length >= _maxFiltros) {
+      return 'Máximo de $_maxFiltros números atingido';
+    }
+    return 'Ex: 0.898  2302  0.110... (máx $_maxFiltros)';
   }
-
-  int get _totalPaginas => (_linhasFiltradas.length / _itensPorPagina).ceil();
-
-  bool get _temPaginaAnterior => _paginaAtual > 0;
-  bool get _temProximaPagina => _paginaAtual < _totalPaginas - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +376,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                   flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                   cursorKeyboardRotationOptions: CursorKeyboardRotationOptions.disabled(),
                 ),
-                initialCenter: BRASILIA_CENTER,
+                initialCenter: brasiliaCenter,
                 initialZoom: 13.0,
                 onTap: (_, __) {
                   _popupController.hideAllPopups();
@@ -357,7 +401,10 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                         Colors.blue,
                         Colors.blueAccent,
                         Colors.blueGrey,
-                        Colors.lightBlue
+                        Colors.lightBlue,
+                        Colors.indigo,
+                        Colors.cyan,
+                        Colors.teal,
                       ];
                       final index = _linhasSelecionadas.toList().indexOf(entry.key);
                       return Polyline(
@@ -394,8 +441,8 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                     markers: _filteredMarkers,
                     builder: (context, markers) {
                       return Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.blue,
+                        decoration: BoxDecoration(
+                          color: _numerosFiltrados.isNotEmpty ? Colors.orange : Colors.blue,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -441,14 +488,15 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                           onClose: () {
                             _popupController.hideAllPopups();
                           },
-                        );                      },
+                        );
+                      },
                     ),
                     showPolygon: true, // Exibe o polígono de agrupamento
                     polygonOptions: PolygonOptions(
-                      borderColor: Colors.blue, // Cor da borda do polígono
-                      borderStrokeWidth: 3, // Largura da borda
-                      color: Colors.blue.withValues(
-                          alpha: 0.2), // Cor de preenchimento com opacidade
+                      borderColor: _numerosFiltrados.isNotEmpty ? Colors.orange : Colors.blue,
+                      borderStrokeWidth: 3,
+                      color: (_numerosFiltrados.isNotEmpty ? Colors.orange : Colors.blue).withValues(
+                          alpha: 0.2),
                     ),
                   ),
                 ),
@@ -467,44 +515,82 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      focusNode: _searchFocusNode,
-                      decoration: const InputDecoration(
-                        hintText: 'Buscar linha...',
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          focusNode: _searchFocusNode,
+                          decoration: InputDecoration(
+                            hintText: _placeholderText,
+                            prefixIcon: const Icon(Icons.search),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          ),
+                          enabled: _numerosFiltrados.length < _maxFiltros || _searchText.isNotEmpty,
+                          onSubmitted: (value) {
+                            if (value.isNotEmpty && _linhasFiltradas.isNotEmpty) {
+                              _carregarTodasRotasNumerosFiltrados();
+                            }
+                          },
+                        ),
                       ),
-                      onSubmitted: (value) {
-                        if (value.isNotEmpty && _linhasFiltradas.isNotEmpty) {
-                          _carregarTodasRotasFiltradas();
-                        }
-                      },
-                    ),
+                      if (_searchText.isNotEmpty) ...[
+                        IconButton(
+                          icon: const Icon(Icons.route),
+                          tooltip: 'Carregar todas as rotas filtradas',
+                          onPressed: _linhasFiltradas.isEmpty ? null : _carregarTodasRotasNumerosFiltrados,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: (){
+                            _limparFiltro();
+                            _limparPercursos();
+                          },
+                        ),
+                      ],
+                    ],
                   ),
-                  if (_searchText.isNotEmpty) ...[
-                    IconButton(
-                      icon: const Icon(Icons.route),
-                      tooltip: 'Carregar todas as rotas',
-                      onPressed: _linhasPaginadas.isEmpty ? null : _carregarTodasRotasFiltradas,
+                  // Indicador dos números filtrados
+                  if (_numerosFiltrados.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                      ),
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: _numerosFiltrados.map((numero) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            numero,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        )).toList(),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                    onPressed: (){
-                        _limparFiltro();
-                        _limparPercursos();
-                    },),
-                  ],
                 ],
               ),
             ),
@@ -513,7 +599,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
           // Lista de linhas filtradas
           if (_searchText.isNotEmpty && _linhasFiltradas.isNotEmpty)
             Positioned(
-              top: 80,
+              top: _numerosFiltrados.isNotEmpty ? 120 : 80,
               left: 16,
               right: 16,
               child: Container(
@@ -523,7 +609,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -535,7 +621,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: const BoxDecoration(
-                        color: Colors.blue,
+                        color: Colors.orange,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(12),
                           topRight: Radius.circular(12),
@@ -574,7 +660,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                             dense: true,
                             leading: CircleAvatar(
                               radius: 16,
-                              backgroundColor: temRota ? Colors.blue : Colors.grey.shade300,
+                              backgroundColor: temRota ? Colors.orange : Colors.grey.shade300,
                               child: Text(
                                 linha,
                                 style: TextStyle(
@@ -592,7 +678,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                                   _carregarPercurso(linha);
                                 }
                               },
-                              child: Text('Linha $linha',style: TextStyle(color: Colors.blueAccent),),
+                              child: Text('Linha $linha',style: const TextStyle(color: Colors.orangeAccent),),
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -601,7 +687,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                                   icon: Icon(
                                     temRota ? Icons.visibility_off : Icons.visibility,
                                     size: 20,
-                                    color: temRota ? Colors.red : Colors.blue,
+                                    color: temRota ? Colors.red : Colors.orange,
                                   ),
                                   tooltip: temRota ? 'Ocultar rota' : 'Ver rota',
                                   onPressed: () {
@@ -637,12 +723,6 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
             mapController: _mapController,
             top: 300,
             right: 16,
-          ),
-
-          CentralizarLocalizacao(
-            mapController: _mapController,
-            top: 300,
-            right: 16,
             // NOVO: Adicione o callback para capturar a localização
             onLocationObtained: (LatLng location) {
               setState(() {
@@ -657,7 +737,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -668,6 +748,11 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                     'Veículos: ${_filteredMarkers.length}/${_markers.length}',
                     style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
+                  if (_numerosFiltrados.isNotEmpty)
+                    Text(
+                      'Filtros ativos: ${_numerosFiltrados.join(", ")}',
+                      style: const TextStyle(color: Colors.orange, fontSize: 12),
+                    ),
                   if (_searchText.isNotEmpty)
                     Text(
                       'Linhas encontradas: ${_linhasFiltradas.length}',
@@ -675,7 +760,7 @@ class _MobileVeiculosState extends State<MobileVeiculos> {
                     ),
                   if (_percursosCarregados.isNotEmpty)
                     Text(
-                      'Rotas filtradas: ${_percursosCarregados.length}',
+                      'Rotas carregadas: ${_percursosCarregados.length}',
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   if (_carregandoPercurso)

@@ -20,8 +20,8 @@ class CustomPopup extends StatelessWidget {
     this.carregandoPercurso = false,
     this.temRota = false,
     this.isLinhaAtual = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class CustomPopup extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

@@ -9,7 +9,7 @@ Widget buildBottomNavigationBar({
       color: const Color(0xFF4A6FA5),
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
+          color: Colors.grey.withValues(alpha: 0.3),
           spreadRadius: 1,
           blurRadius: 5,
           offset: const Offset(0, -2),
@@ -25,10 +25,10 @@ Widget buildBottomNavigationBar({
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(
-          icon:                   const Image(
+          icon: Image(
             image: AssetImage('assets/images/icon_bus.png'),
-            width: 20,
-            height: 20,
+            width: 25,
+            height: 25,
           ),
           tooltip: 'Pesquisar Linhas',
           label: '',

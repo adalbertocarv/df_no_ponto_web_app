@@ -27,7 +27,6 @@ class LocalizacaoUsuarioService {
       // Verifica se o serviço de localização está habilitado no dispositivo/navegador
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        print("Serviço de localização desabilitado.");
         return ResultadoLocalizacao(LocalizacaoStatus.servicoDesabilitado);
       }
 
@@ -39,7 +38,6 @@ class LocalizacaoUsuarioService {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           // O usuário negou a permissão na solicitação atual.
-          print("Permissão de localização negada.");
           return ResultadoLocalizacao(LocalizacaoStatus.permissaoNegada);
         }
       }
@@ -47,7 +45,6 @@ class LocalizacaoUsuarioService {
       if (permission == LocationPermission.deniedForever) {
         // O usuário bloqueou permanentemente o acesso à localização.
         // O app não pode mais solicitar a permissão.
-        print("Permissão de localização negada permanentemente.");
         return ResultadoLocalizacao(LocalizacaoStatus.permissaoNegadaPermanentemente);
       }
 
@@ -64,7 +61,6 @@ class LocalizacaoUsuarioService {
 
     } catch (e) {
       // Captura qualquer outra exceção (ex: timeout, erro de plataforma)
-      print("Ocorreu um erro inesperado ao obter a localização: $e");
       return ResultadoLocalizacao(LocalizacaoStatus.erroInesperado);
     }
   }

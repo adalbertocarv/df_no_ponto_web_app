@@ -7,7 +7,7 @@ import '../constants/url.dart';
 class LinhaInfoService {
 
   Future<List<LinhaInfoModel>> procurarLinha(String numero) async {
-    final url = Uri.parse("${caminhoBackend.baseUrl}/numeros/$numero");
+    final url = Uri.parse("${CaminhoBackend.baseUrl}/numeros/$numero");
 
     // Faz a requisição GET
     final response = await http.get(url, headers: ApiHeaders.json);

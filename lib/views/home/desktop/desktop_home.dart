@@ -5,7 +5,7 @@ import 'package:df_no_ponto_web_app/views/home/desktop/widgets/secao_noticias.da
 import 'package:flutter/material.dart';
 
 class DesktopHome extends StatelessWidget {
-  const DesktopHome({Key? key}) : super(key: key);
+  const DesktopHome({super.key});
 
   @override
   Widget build(BuildContext context) {

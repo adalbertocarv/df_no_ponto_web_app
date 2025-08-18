@@ -1,3 +1,3 @@
-class caminhoBackend {
+class CaminhoBackend {
   static const String baseUrl = 'https://mobilidade.semob.df.gov.br';
 }
