@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../../controller/resultado_linha/resultado_linha_controller.dart';
 import '../../../../models/linha/horario.dart';
 import '../../../../models/linha/veiculos_tempo_real.dart';
+import '../../../../utils/pdf_generator.dart';
 import '../../widgets/build_titulo.dart';
 import '../../widgets/favorite_button.dart';
 
@@ -466,15 +467,14 @@ class DesktopSidePanel extends StatelessWidget {
   // Aba de Informações
   Widget _buildInformacoesTab(BuildContext context) {
     final infoLinhas = dadosController.infoLinha;
-
     if (infoLinhas == null || infoLinhas.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.info, size: 48, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
+            const Icon(Icons.info, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
               'Nenhuma informação disponível',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
@@ -483,47 +483,80 @@ class DesktopSidePanel extends StatelessWidget {
       );
     }
 
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: infoLinhas.length,
-      itemBuilder: (context, index) {
-        final info = infoLinhas[index];
-
-        return Card(
-          color: Colors.white,
-          margin: const EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.info, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Linha ${info.numero}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                _buildInfoRow('Descrição', info.descricao),
-                _buildInfoRow('Sentido', info.sentido),
-                _buildInfoRow('Operadora', info.operadora),
-                _buildInfoRow('Tarifa', 'R\$ ${info.tarifa.toStringAsFixed(2)}'),
-                _buildInfoRow('Faixa Tarifária', info.faixaTarifaria),
-              ],
+      children: [
+        // Botão PDF
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: dadosController.carregando
+                ? null
+                : () => PdfGenerator.gerarPdfLinha(
+              context,
+              infoLinhas.first.numero, // Você precisa pegar um número aqui, ex: o primeiro da lista.
+              dadosController,
+            ),
+            icon: const Icon(Icons.picture_as_pdf, size: 18),
+            label: const Text(
+              'Baixar Relatório PDF',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
             ),
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 12), // Espaçamento entre o botão e a lista
+
+        // ListView de Cards
+        ListView.builder(
+          shrinkWrap: true, // Ocupa apenas o espaço necessário
+          physics: const NeverScrollableScrollPhysics(), // Desabilita o scroll interno
+          itemCount: infoLinhas.length,
+          itemBuilder: (context, index) {
+            final info = infoLinhas[index];
+            return Card(
+              color: Colors.white,
+              margin: const EdgeInsets.only(bottom: 12),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.info, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Linha ${info.numero}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildInfoRow('Descrição', info.descricao),
+                    _buildInfoRow('Sentido', info.sentido),
+                    _buildInfoRow('Operadora', info.operadora),
+                    _buildInfoRow('Tarifa', 'R\$ ${info.tarifa.toStringAsFixed(2)}'),
+                    _buildInfoRow('Faixa Tarifária', info.faixaTarifaria),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 

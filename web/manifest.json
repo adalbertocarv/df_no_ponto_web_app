@@ -1,6 +1,6 @@
 {
-    "name": "df_no_ponto_web_app",
-    "short_name": "df_no_ponto_web_app",
+    "name": "InfoÔnibus - SEMOB",
+    "short_name": "InfoÔnibus - SEMOB",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
